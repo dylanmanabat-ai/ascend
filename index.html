@@ -1991,18 +1991,16 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
     input.focus();
   }
 
-  function parseAndAddGoals(goalList) {
+  async function parseAndAddGoals(goalList) {
     if (!goalList || !goalList.length) return;
     let added = 0;
-    goalList.forEach(g => {
-      if (!g.title) return;
+    for (const g of goalList) {
+      if (!g.title) continue;
       // Handle both old format (tasks as strings) and new format (tasks as objects with subtasks)
       const tasks = (g.tasks || []).map(t => {
         if (typeof t === 'string') {
-          // Old format — plain string label, no subtasks
           return { id: uid(), label: t, done: false, subtasks: [] };
         } else {
-          // New format — object with label and subtasks array
           return {
             id: uid(),
             label: t.label || t,
@@ -2026,9 +2024,13 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
       };
       goals.unshift(newGoal);
       added++;
-      syncGoalToSupabase(newGoal);
-      newGoal.tasks.forEach(t => syncTaskToSupabase(newGoal.id, t));
-    });
+      // IMPORTANT: await goal sync first before syncing tasks
+      // Tasks have a foreign key to goals so goal must exist in DB first
+      await syncGoalToSupabase(newGoal);
+      for (const t of newGoal.tasks) {
+        await syncTaskToSupabase(newGoal.id, t);
+      }
+    }
     if (added > 0) {
       save(); render();
       const goalsList = document.getElementById('goals-list');
@@ -2273,8 +2275,10 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
     };
     goals.unshift(newGoal);
     save(); render();
-    syncGoalToSupabase(newGoal);
-    newGoal.tasks.forEach(t => syncTaskToSupabase(newGoal.id, t));
+    // Await goal first so tasks don't fail foreign key check
+    syncGoalToSupabase(newGoal).then(() => {
+      newGoal.tasks.forEach(t => syncTaskToSupabase(newGoal.id, t));
+    });
     // Close templates panel
     document.getElementById('templates-grid').style.display = 'none';
     document.getElementById('tmpl-arrow').textContent = '▸';
