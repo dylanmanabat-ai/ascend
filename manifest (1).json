@@ -1,0 +1,25 @@
+{
+  "name": "Ascend — Goal Tracker",
+  "short_name": "Ascend",
+  "description": "Your goals, made reachable. Track goals, build habits, and get 1% better everyday.",
+  "start_url": "/ascend/",
+  "scope": "/ascend/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F2EC",
+  "theme_color": "#C8602A",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
