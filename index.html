@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Ascend — Goal Tracker</title>
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#C8602A"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="Ascend"/>
+  <link rel="apple-touch-icon" href="icon-192.png"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #F5F2EC;
+      --surface:   #FDFAF5;
+      --ink:       #1C1A17;
+      --ink-muted: #7A7570;
+      --accent:    #C8602A;
+      --accent-lt: #F2E6DC;
+      --border:    #E2DDD6;
+      --done-bg:   #EAF0E8;
+      --done-ink:  #4A7A44;
+      --ai-bg:     #1C1A17;
+      --ai-surface:#272420;
+      --ai-border: #3A3632;
+      --ai-muted:  #8A8580;
+      --r: 10px;
+    }
+    [data-theme="dark"] {
+      --bg:        #161412;
+      --surface:   #1F1C19;
+      --ink:       #F0EDE6;
+      --ink-muted: #6A6560;
+      --accent:    #E08A5A;
+      --accent-lt: #2E2218;
+      --border:    #2E2B27;
+      --done-bg:   #1A2418;
+      --done-ink:  #5AAA54;
+      --ai-bg:     #0E0D0B;
+      --ai-surface:#161412;
+      --ai-border: #252220;
+      --ai-muted:  #5A5550;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      padding: 48px 24px 0;
+      padding-top: max(48px, env(safe-area-inset-top));
+      padding-left: max(24px, env(safe-area-inset-left));
+      padding-right: max(24px, env(safe-area-inset-right));
+    }
+
+    header { max-width: 680px; margin: 0 auto 40px; width: 100%; }
+    header h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    header h1 em { font-style: italic; color: var(--accent); }
+    header p { margin-top: 10px; font-size: 0.95rem; color: var(--ink-muted); font-family: 'Instrument Serif', serif; }
+
+    /* Stats */
+    .stats-bar {
+      max-width: 680px; margin: 0 auto 32px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 16px 18px;
+    }
+    .stat-card .num {
+      font-family: 'Instrument Serif', serif;
+      font-size: 2rem; font-weight: 400; line-height: 1; color: var(--accent);
+    }
+    .stat-card .lbl { font-size: 0.78rem; color: var(--ink-muted); margin-top: 4px; }
+
+    /* Add form */
+    .add-form {
+      max-width: 680px; margin: 0 auto 32px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 22px;
+    }
+    .add-form h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.1rem; font-weight: 400; margin-bottom: 14px;
+    }
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .form-row input[type="text"] {
+      flex: 1; min-width: 180px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink);
+      outline: none; transition: border-color 0.2s;
+    }
+    .form-row input:focus { border-color: var(--accent); }
+    .form-row input::placeholder { color: var(--ink-muted); }
+    .date-field { display: flex; flex-direction: column; gap: 3px; }
+    .date-label { font-size: 0.7rem; color: var(--ink-muted); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; padding-left: 2px; }
+    .cat-select {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink);
+      outline: none; cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: 10px 20px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s; white-space: nowrap;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.97); }
+
+    /* Filter row */
+    .filter-row {
+      max-width: 680px; margin: 0 auto 20px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .filter-label { font-size: 0.88rem; color: var(--ink-muted); white-space: nowrap; }
+    .filter-select {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink);
+      outline: none; cursor: pointer; transition: border-color 0.2s;
+    }
+    .filter-select:focus { border-color: var(--accent); }
+
+    /* ── TODAY'S FOCUS ── */
+    .focus-section {
+      max-width: 680px; margin: 0 auto 32px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden;
+    }
+    .focus-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px; border-bottom: 1px solid var(--border);
+    }
+    .focus-header-left { display: flex; align-items: center; gap: 10px; }
+    .focus-title { font-family: 'Instrument Serif', serif; font-size: 1.05rem; font-weight: 400; }
+    .streak-badge {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--accent-lt); border: 1px solid #E0C0A8;
+      border-radius: 99px; padding: 3px 10px;
+      font-size: 0.78rem; font-weight: 500; color: var(--accent);
+    }
+    .focus-body { padding: 14px 18px; }
+    .focus-empty { font-size: 0.88rem; color: var(--ink-muted); padding: 6px 0; font-style: italic; }
+    .focus-task {
+      display: flex; align-items: center; gap: 11px;
+      padding: 9px 11px; border-radius: 8px;
+      background: var(--bg); border: 1px solid transparent;
+      margin-bottom: 7px; transition: background 0.2s;
+    }
+    .focus-task.done { background: var(--done-bg); border-color: #C8DFC6; }
+    .focus-task .task-label { flex: 1; font-size: 0.9rem; }
+    .focus-task-goal { font-size: 0.75rem; color: var(--ink-muted); margin-top: 1px; }
+    .btn-unpin {
+      background: none; border: none; cursor: pointer;
+      color: transparent; font-size: 0.85rem; padding: 2px 4px;
+      border-radius: 4px; transition: color 0.15s;
+    }
+    .focus-task:hover .btn-unpin { color: var(--ink-muted); }
+    .btn-unpin:hover { color: var(--accent) !important; }
+    .btn-pin {
+      background: none; border: none; cursor: pointer; color: transparent;
+      font-size: 0.82rem; padding: 2px 4px; border-radius: 4px;
+      transition: color 0.15s; line-height: 1;
+    }
+    .task-item:hover .btn-pin { color: var(--ink-muted); }
+    .btn-pin:hover { color: var(--accent) !important; }
+    .btn-pin.pinned { color: var(--accent) !important; }
+
+    /* ── CHART ── */
+    .chart-section {
+      max-width: 680px; margin: 0 auto 32px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px 22px;
+    }
+    .chart-title { font-family: 'Instrument Serif', serif; font-size: 1.05rem; font-weight: 400; margin-bottom: 18px; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 8px; height: 80px; }
+    .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .chart-bar-wrap { width: 100%; flex: 1; display: flex; align-items: flex-end; }
+    .chart-bar {
+      width: 100%; border-radius: 4px 4px 0 0;
+      background: var(--accent); opacity: 0.75;
+      transition: height 0.4s cubic-bezier(.4,0,.2,1); min-height: 3px;
+    }
+    .chart-bar.today { opacity: 1; }
+    .chart-bar.zero { background: var(--border); opacity: 1; min-height: 3px; }
+    .chart-day { font-size: 0.7rem; color: var(--ink-muted); }
+    .chart-count { font-size: 0.7rem; font-weight: 500; color: var(--ink-muted); }
+
+    /* Goals list */
+    .goals-list { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+    /* Goal card */
+    .goal-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden;
+      animation: slideIn 0.25s ease;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .goal-header { display: flex; align-items: flex-start; gap: 12px; padding: 18px 18px 14px; }
+    .goal-title-wrap { flex: 1; }
+
+    .cat-pill {
+      display: inline-block; font-size: 0.7rem; font-weight: 500;
+      padding: 2px 8px; border-radius: 99px; margin-bottom: 5px;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .cat-health   { background: #E8F4E8; color: #3A6E35; }
+    .cat-career   { background: #E8EEF8; color: #2E4E8A; }
+    .cat-learning { background: #F5EDE0; color: #8A5A20; }
+    .cat-finance  { background: #E8F2EE; color: #2A6655; }
+    .cat-personal { background: #F2E8F4; color: #6A3A7A; }
+    .cat-other    { background: #EEECE8; color: #5A5550; }
+    [data-theme="dark"] .cat-health   { background: #1A2E1A; color: #5AAA54; }
+    [data-theme="dark"] .cat-career   { background: #1A1E2E; color: #5A80C8; }
+    [data-theme="dark"] .cat-learning { background: #2A2018; color: #C89040; }
+    [data-theme="dark"] .cat-finance  { background: #1A2A24; color: #4AAA88; }
+    [data-theme="dark"] .cat-personal { background: #241A2E; color: #9A60C8; }
+    [data-theme="dark"] .cat-other    { background: #222018; color: #8A8070; }
+
+    .goal-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.15rem; font-weight: 400; line-height: 1.3;
+    }
+    .goal-badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 500;
+      padding: 2px 8px; border-radius: 99px; margin-left: 8px;
+      vertical-align: middle; background: var(--done-bg); color: var(--done-ink);
+    }
+    .progress-wrap { margin-top: 8px; display: flex; align-items: center; gap: 10px; }
+    .progress-bar { flex: 1; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+    .progress-fill.complete { background: var(--done-ink); }
+    .progress-pct { font-size: 0.78rem; font-weight: 500; color: var(--ink-muted); min-width: 30px; text-align: right; }
+
+    .goal-actions { display: flex; gap: 4px; }
+    .btn-icon {
+      background: none; border: none; cursor: pointer; color: var(--ink-muted);
+      padding: 5px; border-radius: 6px; font-size: 0.95rem; line-height: 1;
+      transition: color 0.15s, background 0.15s;
+    }
+    .btn-icon:hover { color: var(--accent); background: var(--accent-lt); }
+
+    /* Tasks */
+    .tasks-section { border-top: 1px solid var(--border); padding: 14px 18px 18px; }
+    .tasks-list { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+    .task-item {
+      display: flex; align-items: center; gap: 11px; padding: 9px 11px;
+      border-radius: 8px; background: var(--bg); border: 1px solid transparent;
+      transition: background 0.2s, border-color 0.2s; animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .task-item.done { background: var(--done-bg); border-color: #C8DFC6; }
+    .task-check {
+      width: 19px; height: 19px; border-radius: 5px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.15s, border-color 0.15s;
+    }
+    .task-item.done .task-check { background: var(--done-ink); border-color: var(--done-ink); }
+    .task-check svg { display: none; }
+    .task-item.done .task-check svg { display: block; }
+    .task-label { flex: 1; font-size: 0.9rem; color: var(--ink); transition: color 0.2s; }
+    .task-item.done .task-label { color: var(--done-ink); text-decoration: line-through; text-decoration-color: #98C494; }
+    .btn-delete-task {
+      background: none; border: none; cursor: pointer; color: transparent;
+      font-size: 0.9rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s;
+    }
+    .task-item:hover .btn-delete-task { color: var(--ink-muted); }
+    .btn-delete-task:hover { color: var(--accent) !important; }
+    .add-task-row { display: flex; gap: 8px; }
+    .add-task-row input {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 13px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.86rem; color: var(--ink);
+      outline: none; transition: border-color 0.2s;
+    }
+    .add-task-row input:focus { border-color: var(--accent); }
+    .add-task-row input::placeholder { color: var(--ink-muted); }
+    .btn-add-task {
+      background: var(--accent-lt); color: var(--accent); border: 1px solid #E0C0A8;
+      border-radius: 8px; padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500;
+      cursor: pointer; transition: background 0.15s; white-space: nowrap;
+    }
+    .btn-add-task:hover { background: #EDD5C4; }
+
+    .empty-state { max-width: 680px; margin: 0 auto; text-align: center; padding: 52px 20px; color: var(--ink-muted); }
+    .empty-state .icon { font-size: 2rem; margin-bottom: 12px; display: block; opacity: 0.45; }
+    .empty-state p { font-size: 0.92rem; line-height: 1.6; }
+
+
+    /* ── PRIORITY & DUE DATE ── */
+    .priority-high   { background: #FDE8E8; color: #A33030; border: 1px solid #F5C0C0; }
+    .priority-medium { background: #F2E6DC; color: #8A3A10; border: 1px solid #E0C0A8; }
+    .priority-low    { background: #E8F4E8; color: #3A6E35; border: 1px solid #B8DDB5; }
+    [data-theme="dark"] .priority-high   { background: #2E1A1A; color: #C96060; border-color: #4A2A2A; }
+    [data-theme="dark"] .priority-medium { background: #2E2218; color: #E08A5A; border-color: #4A3828; }
+    [data-theme="dark"] .priority-low    { background: #1A2E1A; color: #5AAA54; border-color: #2A4A2A; }
+    .priority-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.7rem; font-weight: 500; padding: 2px 8px;
+      border-radius: 99px; letter-spacing: 0.03em;
+    }
+    .due-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.7rem; font-weight: 500; padding: 2px 8px;
+      border-radius: 99px; background: #EEECE8; color: #5A5550;
+      border: 1px solid #D8D4CC;
+    }
+    .due-pill.overdue  { background: #FDE8E8; color: #A33030; border-color: #F5C0C0; }
+    .due-pill.soon     { background: #FEF3E2; color: #8A5A10; border-color: #F5D8A0; }
+    .goal-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+    .meta-select {
+      font-size: 0.7rem; font-weight: 500; padding: 2px 6px;
+      border-radius: 99px; letter-spacing: 0.03em;
+      border: 1px solid transparent; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; outline: none;
+      appearance: none; -webkit-appearance: none;
+    }
+    .meta-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    /* Notes section */
+    .notes-section {
+      border-top: 1px solid var(--border);
+      padding: 12px 18px;
+    }
+    .notes-toggle {
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: var(--ink-muted); padding: 0; display: flex;
+      align-items: center; gap: 6px; transition: color 0.15s;
+    }
+    .notes-toggle:hover { color: var(--accent); }
+    .notes-area {
+      width: 100%; margin-top: 10px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.86rem;
+      color: var(--ink); resize: vertical; min-height: 72px;
+      outline: none; transition: border-color 0.2s; line-height: 1.6;
+    }
+    .notes-area:focus { border-color: var(--accent); }
+    .notes-area::placeholder { color: var(--ink-muted); }
+    .notes-hidden { display: none; }
+
+    /* Sort row */
+    .sort-row {
+      max-width: 680px; margin: 0 auto 16px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .sort-label { font-size: 0.82rem; color: var(--ink-muted); }
+    .sort-btn {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 99px; padding: 5px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: var(--ink-muted);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .sort-btn:hover  { border-color: var(--accent); color: var(--accent); }
+    .sort-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+
+    /* ── RECURRING TASKS ── */
+    .recur-pill {
+      font-size: 0.68rem; font-weight: 500; padding: 1px 6px;
+      border-radius: 99px; background: #E8EEF8; color: #2E4E8A;
+      border: 1px solid #C0CFF0; white-space: nowrap; flex-shrink: 0;
+    }
+    [data-theme="dark"] .recur-pill { background: #1A1E2E; color: #5A80C8; border-color: #2A304A; }
+    .btn-recur {
+      background: none; border: none; cursor: pointer; color: transparent;
+      font-size: 0.82rem; padding: 2px 4px; border-radius: 4px;
+      transition: color 0.15s; line-height: 1; flex-shrink: 0;
+    }
+    .task-item:hover .btn-recur { color: var(--ink-muted); }
+    .btn-recur:hover { color: var(--accent) !important; }
+    .btn-recur.active { color: #2E4E8A !important; }
+    [data-theme="dark"] .btn-recur.active { color: #5A80C8 !important; }
+
+    /* ── TASK DUE DATE ── */
+    .task-due-pill {
+      font-size: 0.68rem; font-weight: 500; padding: 1px 6px;
+      border-radius: 99px; background: #EEECE8; color: #5A5550;
+      border: 1px solid #D8D4CC; white-space: nowrap; flex-shrink: 0;
+      cursor: pointer;
+    }
+    .task-due-pill.soon   { background: #FEF3E2; color: #8A5A10; border-color: #F5D8A0; }
+    .task-due-pill.overdue{ background: #FDE8E8; color: #A33030; border-color: #F5C0C0; }
+    .task-due-input {
+      font-size: 0.72rem; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 2px 6px; color: var(--ink);
+      font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer;
+    }
+    .task-due-input:focus { border-color: var(--accent); }
+
+    /* ── SUBTASKS ── */
+    .subtasks-wrap { padding: 0 11px 8px 40px; display: none; }
+    .subtasks-wrap.open { display: block; }
+    .subtask-list { list-style: none; display: flex; flex-direction: column; gap: 5px; margin-bottom: 7px; }
+    .subtask-item {
+      display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+      border-radius: 7px; background: var(--bg); border: 1px solid transparent;
+      transition: background 0.2s;
+    }
+    .subtask-item.done { background: var(--done-bg); border-color: #C8DFC6; }
+    .subtask-check {
+      width: 15px; height: 15px; border-radius: 4px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.15s, border-color 0.15s;
+    }
+    .subtask-item.done .subtask-check { background: var(--done-ink); border-color: var(--done-ink); }
+    .subtask-check svg { display: none; }
+    .subtask-item.done .subtask-check svg { display: block; }
+    .subtask-label {
+      flex: 1; font-size: 0.82rem; color: var(--ink); background: none;
+      border: none; outline: none; font-family: 'DM Sans', sans-serif;
+      padding: 0; cursor: text;
+    }
+    .subtask-item.done .subtask-label { color: var(--done-ink); text-decoration: line-through; text-decoration-color: #98C494; }
+    .btn-del-subtask {
+      background: none; border: none; cursor: pointer; color: transparent;
+      font-size: 0.78rem; padding: 1px 3px; transition: color 0.15s;
+    }
+    .subtask-item:hover .btn-del-subtask { color: var(--ink-muted); }
+    .btn-del-subtask:hover { color: var(--accent) !important; }
+    .add-subtask-row { display: flex; gap: 6px; }
+    .add-subtask-row input {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 7px; padding: 5px 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: var(--ink);
+      outline: none; transition: border-color 0.2s;
+    }
+    .add-subtask-row input:focus { border-color: var(--accent); }
+    .add-subtask-row input::placeholder { color: var(--ink-muted); }
+    .btn-add-subtask {
+      background: var(--accent-lt); color: var(--accent); border: 1px solid #E0C0A8;
+      border-radius: 7px; padding: 5px 10px; font-size: 0.76rem; font-weight: 500;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .btn-add-subtask:hover { background: #EDD5C4; }
+    .btn-subtasks {
+      background: none; border: none; cursor: pointer; color: transparent;
+      font-size: 0.78rem; padding: 2px 4px; border-radius: 4px;
+      transition: color 0.15s; line-height: 1; flex-shrink: 0;
+    }
+    .task-item:hover .btn-subtasks { color: var(--ink-muted); }
+    .btn-subtasks:hover { color: var(--accent) !important; }
+    .btn-subtasks.has-subs { color: var(--accent) !important; }
+    .subtask-progress {
+      font-size: 0.68rem; color: var(--ink-muted); white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* ── GOAL TEMPLATES ── */
+    .templates-section {
+      max-width: 680px; margin: 0 auto 20px;
+    }
+    .templates-toggle {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 0.84rem;
+      color: var(--ink-muted); padding: 6px 0; transition: color 0.15s;
+    }
+    .templates-toggle:hover { color: var(--accent); }
+    .templates-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px; margin-top: 12px; display: none;
+    }
+    .template-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px 16px; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .template-card:hover { border-color: var(--accent); background: var(--accent-lt); }
+    .template-icon { font-size: 1.2rem; margin-bottom: 6px; display: block; }
+    .template-name { font-size: 0.88rem; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+    .template-desc { font-size: 0.74rem; color: var(--ink-muted); line-height: 1.4; }
+
+    /* ── USABILITY: EDIT, DRAG, ARCHIVE ── */
+    .drag-handle {
+      cursor: grab; color: transparent; font-size: 1rem;
+      padding: 2px 4px; border-radius: 4px; line-height: 1;
+      flex-shrink: 0; transition: color 0.15s; user-select: none;
+    }
+    .goal-card:hover .drag-handle { color: var(--ink-muted); }
+    .drag-handle:active { cursor: grabbing; }
+    .goal-card.dragging { opacity: 0.4; }
+    .goal-card.drag-over { border-color: var(--accent); border-style: dashed; }
+
+    .editable-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.15rem; font-weight: 400; line-height: 1.3;
+      background: none; border: none; outline: none;
+      color: var(--ink); width: 100%; padding: 0;
+      cursor: text;
+    }
+    .editable-title:focus {
+      background: var(--bg); border-radius: 6px;
+      padding: 2px 6px; margin: -2px -6px;
+      border: 1px solid var(--accent);
+    }
+    .editable-task {
+      flex: 1; background: none; border: none; outline: none;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+      color: var(--ink); padding: 0; cursor: text; width: 100%;
+    }
+    .editable-task:focus {
+      background: var(--bg); border-radius: 4px;
+      padding: 1px 5px; margin: -1px -5px;
+      border: 1px solid var(--accent);
+    }
+    .task-item.done .editable-task { color: var(--done-ink); text-decoration: line-through; text-decoration-color: #98C494; }
+
+    .btn-archive {
+      background: none; border: none; cursor: pointer; color: var(--ink-muted);
+      padding: 5px; border-radius: 6px; font-size: 0.82rem; line-height: 1;
+      transition: color 0.15s, background 0.15s;
+    }
+    .btn-archive:hover { color: var(--accent); background: var(--accent-lt); }
+
+    .archived-section {
+      max-width: 680px; margin: 24px auto 0;
+    }
+    .archived-toggle {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 0.86rem;
+      color: var(--ink-muted); padding: 8px 0; width: 100%;
+      border-top: 1px solid var(--border); transition: color 0.15s;
+    }
+    .archived-toggle:hover { color: var(--accent); }
+    .archived-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .archived-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px 18px;
+      opacity: 0.7; display: flex; align-items: center; gap: 12px;
+    }
+    .archived-card-info { flex: 1; }
+    .archived-title { font-family: 'Instrument Serif', serif; font-size: 1rem; color: var(--ink); }
+    .archived-meta { font-size: 0.76rem; color: var(--ink-muted); margin-top: 3px; }
+    .btn-restore {
+      background: none; border: 1px solid var(--border); border-radius: 7px;
+      padding: 5px 12px; font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+      color: var(--ink-muted); cursor: pointer; white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .btn-restore:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-delete-archived {
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-muted); font-size: 0.85rem; padding: 4px;
+      border-radius: 4px; transition: color 0.15s;
+    }
+    .btn-delete-archived:hover { color: #A33030; }
+
+    /* ── THEME TOGGLE ── */
+    .theme-toggle {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .theme-toggle-label {
+      font-size: 0.8rem; color: var(--ink-muted);
+    }
+    .toggle-track {
+      position: relative; width: 40px; height: 22px;
+      background: var(--border); border-radius: 99px;
+      cursor: pointer; transition: background 0.2s;
+      border: 1px solid var(--border); flex-shrink: 0;
+    }
+    .toggle-track.on { background: var(--accent); border-color: var(--accent); }
+    .toggle-thumb {
+      position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--surface); transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-track.on .toggle-thumb { transform: translateX(18px); }
+
+    /* ── AI COACH ── */
+    .ai-section { background: var(--ai-bg); margin-top: 64px; padding: 48px 24px 60px; }
+    .ai-inner { max-width: 680px; margin: 0 auto; }
+    .ai-header { margin-bottom: 28px; }
+    .ai-header h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 400;
+      color: #F5F2EC; letter-spacing: -0.01em;
+    }
+    .ai-header h2 em { font-style: italic; color: #E08A5A; }
+    .ai-header p { margin-top: 8px; font-size: 0.9rem; color: var(--ai-muted); line-height: 1.6; }
+
+    .api-setup {
+      background: var(--ai-surface); border: 1px solid var(--ai-border);
+      border-radius: var(--r); padding: 18px; margin-bottom: 24px;
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    }
+    .api-setup label { font-size: 0.82rem; color: var(--ai-muted); white-space: nowrap; }
+    .api-setup input {
+      flex: 1; min-width: 200px;
+      background: var(--ai-bg); border: 1px solid var(--ai-border);
+      border-radius: 7px; padding: 9px 13px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.86rem; color: #F5F2EC;
+      outline: none; transition: border-color 0.2s; letter-spacing: 0.05em;
+    }
+    .api-setup input:focus { border-color: #E08A5A; }
+    .api-setup input::placeholder { color: var(--ai-muted); letter-spacing: 0; }
+    .btn-save-key {
+      background: #E08A5A; color: #fff; border: none;
+      border-radius: 7px; padding: 9px 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500;
+      cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+    }
+    .btn-save-key:hover { opacity: 0.85; }
+    .key-status { font-size: 0.78rem; padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
+    .key-status.set   { background: #1E3A1E; color: #6EC96E; }
+    .key-status.unset { background: #3A1E1E; color: #C96E6E; }
+
+    .suggestion-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .chip {
+      background: var(--ai-surface); border: 1px solid var(--ai-border);
+      border-radius: 99px; padding: 7px 14px;
+      font-size: 0.8rem; color: #B0ADA8; cursor: pointer; transition: all 0.15s;
+    }
+    .chip:hover { border-color: #E08A5A; color: #E08A5A; }
+
+    .chat-messages {
+      display: flex; flex-direction: column; gap: 16px;
+      margin-bottom: 20px; max-height: 420px; overflow-y: auto; padding-right: 4px;
+    }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--ai-border); border-radius: 99px; }
+
+    .msg { display: flex; gap: 12px; animation: fadeIn 0.2s ease; }
+    .msg-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 500; flex-shrink: 0; margin-top: 2px;
+    }
+    .msg.user .msg-avatar { background: #3A3632; color: #B0ADA8; margin-left: auto; order: 2; }
+    .msg.ai   .msg-avatar { background: #E08A5A; color: #fff; }
+    .msg-bubble { max-width: 86%; padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; line-height: 1.65; }
+    .msg.user .msg-bubble {
+      background: #2E2B27; color: #D8D4CE;
+      border-bottom-right-radius: 3px; margin-left: auto; order: 1;
+    }
+    .msg.ai .msg-bubble {
+      background: var(--ai-surface); color: #D8D4CE;
+      border-bottom-left-radius: 3px; border: 1px solid var(--ai-border);
+    }
+
+    .typing-indicator { display: flex; gap: 12px; align-items: center; }
+    .typing-dots {
+      background: var(--ai-surface); border: 1px solid var(--ai-border);
+      border-radius: 12px; border-bottom-left-radius: 3px;
+      padding: 14px 18px; display: flex; gap: 5px; align-items: center;
+    }
+    .typing-dots span {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--ai-muted);
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+
+    .chat-input-row { display: flex; gap: 10px; }
+    .chat-input-row textarea {
+      flex: 1; background: var(--ai-surface); border: 1px solid var(--ai-border);
+      border-radius: 10px; padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: #F5F2EC;
+      outline: none; resize: none; height: 46px; max-height: 120px;
+      transition: border-color 0.2s; line-height: 1.5;
+    }
+    .chat-input-row textarea:focus { border-color: #E08A5A; }
+    .chat-input-row textarea::placeholder { color: var(--ai-muted); }
+    .btn-send {
+      background: #E08A5A; color: #fff; border: none;
+      border-radius: 10px; width: 46px; height: 46px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.15s, transform 0.1s; flex-shrink: 0;
+    }
+    .btn-send:hover { opacity: 0.85; }
+    .btn-send:active { transform: scale(0.95); }
+    .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+
+    /* ── AI IMPROVEMENTS ── */
+    .weekly-review-btn {
+      width: 100%; background: none;
+      border: 1px solid var(--ai-border); border-radius: var(--r);
+      padding: 12px 18px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+      color: #B0ADA8; cursor: pointer; transition: all 0.2s;
+      text-align: left;
+    }
+    .weekly-review-btn:hover { border-color: #E08A5A; color: #E08A5A; background: rgba(224,138,90,0.06); }
+    .weekly-review-btn .wbr-left { display: flex; align-items: center; gap: 10px; }
+    .weekly-review-btn .wbr-icon { font-size: 1.1rem; }
+    .weekly-review-btn .wbr-label { font-weight: 500; }
+    .weekly-review-btn .wbr-sub { font-size: 0.76rem; color: var(--ai-muted); margin-top: 1px; }
+    .weekly-review-btn .wbr-arrow { font-size: 0.9rem; color: var(--ai-muted); }
+
+    .proactive-notices {
+      display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;
+    }
+    .notice-card {
+      background: var(--ai-surface); border: 1px solid var(--ai-border);
+      border-radius: 8px; padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .notice-icon { font-size: 1rem; flex-shrink: 0; }
+    .notice-text { flex: 1; font-size: 0.82rem; color: #B0ADA8; line-height: 1.5; }
+    .notice-text strong { color: #D8D4CE; font-weight: 500; }
+    .btn-notice-action {
+      background: none; border: 1px solid var(--ai-border);
+      border-radius: 6px; padding: 4px 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.76rem;
+      color: #8A8580; cursor: pointer; white-space: nowrap;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .btn-notice-action:hover { border-color: #E08A5A; color: #E08A5A; }
+
+    .ai-disclaimer { margin-top: 16px; font-size: 0.75rem; color: var(--ai-muted); line-height: 1.5; }
+    .ai-disclaimer a { color: #E08A5A; text-decoration: none; }
+    .ai-disclaimer a:hover { text-decoration: underline; }
+
+    /* ── AUTH ── */
+    #auth-screen {
+      position: fixed; inset: 0; z-index: 998;
+      background: var(--bg);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .auth-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px 32px;
+      width: 100%; max-width: 400px;
+    }
+    .auth-card h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.8rem; font-weight: 400;
+      letter-spacing: -0.02em; margin-bottom: 6px; color: var(--ink);
+    }
+    .auth-card h2 em { font-style: italic; color: var(--accent); }
+    .auth-card p { font-size: 0.88rem; color: var(--ink-muted); margin-bottom: 28px; }
+    .auth-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .auth-field label { font-size: 0.76rem; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .auth-field input {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.92rem; color: var(--ink);
+      outline: none; transition: border-color 0.2s;
+    }
+    .auth-field input:focus { border-color: var(--accent); }
+    .auth-field input::placeholder { color: var(--ink-muted); }
+    .btn-auth {
+      width: 100%; background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: 12px; margin-top: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-auth:hover { opacity: 0.88; }
+    .btn-auth:disabled { opacity: 0.5; cursor: not-allowed; }
+    .auth-switch {
+      text-align: center; margin-top: 18px;
+      font-size: 0.84rem; color: var(--ink-muted);
+    }
+    .auth-switch button {
+      background: none; border: none; cursor: pointer;
+      color: var(--accent); font-size: 0.84rem;
+      font-family: 'DM Sans', sans-serif;
+      text-decoration: underline; padding: 0;
+    }
+    .auth-error {
+      background: #FDE8E8; color: #A33030; border: 1px solid #F5C0C0;
+      border-radius: 8px; padding: 10px 14px; font-size: 0.84rem;
+      margin-bottom: 16px; display: none;
+    }
+    [data-theme="dark"] .auth-error { background: #2E1A1A; color: #C96060; border-color: #4A2A2A; }
+    .auth-success {
+      background: var(--done-bg); color: var(--done-ink); border: 1px solid #C8DFC6;
+      border-radius: 8px; padding: 10px 14px; font-size: 0.84rem;
+      margin-bottom: 16px; display: none;
+    }
+    .user-bar {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 8px; flex-shrink: 0;
+    }
+    .user-email {
+      font-size: 0.78rem; color: var(--ink-muted);
+      max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .btn-signout {
+      background: none; border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.76rem;
+      color: var(--ink-muted); cursor: pointer; transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-signout:hover { border-color: var(--accent); color: var(--accent); }
+    .sync-indicator {
+      font-size: 0.72rem; color: var(--ink-muted);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .sync-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--done-ink); flex-shrink: 0;
+    }
+    .sync-dot.syncing { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+    .sync-dot.error { background: #A33030; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* Supabase setup banner */
+    .setup-banner {
+      max-width: 680px; margin: 0 auto 24px;
+      background: var(--accent-lt); border: 1px solid #E0C0A8;
+      border-radius: var(--r); padding: 14px 18px;
+      display: none; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .setup-banner p { font-size: 0.84rem; color: var(--ink); flex: 1; min-width: 200px; }
+    .setup-banner input {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 7px; padding: 7px 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: var(--ink);
+      outline: none; width: 220px; transition: border-color 0.2s;
+    }
+    .setup-banner input:focus { border-color: var(--accent); }
+    .btn-connect {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 7px; padding: 7px 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+    }
+    .btn-connect:hover { opacity: 0.88; }
+
+    /* ── LANDING SCREEN ── */
+    #landing {
+      position: fixed; inset: 0; z-index: 999;
+      background: var(--bg);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: env(safe-area-inset-top, 24px) 24px env(safe-area-inset-bottom, 24px);
+      overflow-y: auto;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    #landing.hidden {
+      opacity: 0; transform: translateY(-16px);
+      pointer-events: none;
+    }
+    .landing-inner {
+      max-width: 560px; width: 100%; text-align: center;
+      padding: 40px 0 24px;
+      margin: auto;
+    }
+    .landing-logo {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(3rem, 10vw, 7rem);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .landing-logo em { font-style: italic; color: var(--accent); }
+    .landing-tagline {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.05rem;
+      color: var(--ink-muted);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+    .landing-features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .landing-feature {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .landing-feature .feat-icon {
+      font-size: 1.6rem; display: block; margin-bottom: 10px;
+    }
+    .landing-feature .feat-title {
+      font-size: 0.88rem; font-weight: 500; color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .landing-feature .feat-desc {
+      font-size: 0.76rem; color: var(--ink-muted); line-height: 1.5;
+    }
+    .btn-get-started {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 10px; padding: 14px 40px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+      display: inline-block; margin-bottom: 16px;
+    }
+    .btn-get-started:hover { opacity: 0.88; }
+    .btn-get-started:active { transform: scale(0.97); }
+    .landing-returning {
+      font-size: 0.8rem; color: var(--ink-muted);
+    }
+    .landing-returning button {
+      background: none; border: none; cursor: pointer;
+      color: var(--accent); font-size: 0.8rem;
+      font-family: 'DM Sans', sans-serif;
+      text-decoration: underline; padding: 0;
+    }
+    .landing-theme-row {
+      position: absolute; top: 20px; right: 24px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .landing-theme-row .theme-toggle-label {
+      font-size: 0.8rem; color: var(--ink-muted);
+    }
+
+
+    /* ── CONFETTI ── */
+    #confetti-canvas {
+      position: fixed; inset: 0; z-index: 9999;
+      pointer-events: none; display: none;
+    }
+
+    /* ── ENHANCED ANIMATIONS ── */
+    .goal-card {
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .goal-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+      transform: translateY(-1px);
+    }
+    [data-theme="dark"] .goal-card:hover {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .task-check {
+      transition: background 0.2s, border-color 0.2s, transform 0.15s !important;
+    }
+    .task-check:hover { transform: scale(1.1); }
+    .task-item.done .task-check { animation: checkBounce 0.3s cubic-bezier(.36,.07,.19,.97); }
+    @keyframes checkBounce {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.25); }
+      70%  { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    .progress-fill {
+      transition: width 0.6s cubic-bezier(.4,0,.2,1) !important;
+    }
+    .goal-card.just-completed {
+      animation: completedPulse 0.6s ease forwards;
+    }
+    @keyframes completedPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(74,122,68,0.4); }
+      50%  { box-shadow: 0 0 0 10px rgba(74,122,68,0); }
+      100% { box-shadow: 0 0 0 0 rgba(74,122,68,0); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .btn-primary, .btn-get-started {
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s !important;
+    }
+    .btn-primary:hover, .btn-get-started:hover {
+      box-shadow: 0 4px 12px rgba(200,96,42,0.3);
+    }
+    [data-theme="dark"] .btn-primary:hover,
+    [data-theme="dark"] .btn-get-started:hover {
+      box-shadow: 0 4px 12px rgba(224,138,90,0.3);
+    }
+    .stat-card {
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .goal-badge {
+      animation: badgePop 0.4s cubic-bezier(.36,.07,.19,.97);
+    }
+    @keyframes badgePop {
+      0%   { transform: scale(0); opacity: 0; }
+      60%  { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ── MOBILE RESPONSIVENESS ── */
+    @media (max-width: 600px) {
+      body { padding: 24px 16px 0; }
+
+      header h1 { font-size: 2rem; }
+      header { margin-bottom: 24px; }
+
+      .stats-bar { grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 20px; }
+      .stat-card { padding: 12px 10px; }
+      .stat-card .num { font-size: 1.5rem; }
+      .stat-card .lbl { font-size: 0.68rem; }
+
+      .form-row { flex-direction: column; }
+      .date-field { width: 100%; }
+      .date-field input[type="text"], .cat-select { width: 100%; }
+      .btn-primary { width: 100%; }
+
+      .filter-row { gap: 8px; }
+      .filter-select { flex: 1; }
+
+      .sort-row { gap: 6px; }
+      .sort-btn { padding: 4px 10px; font-size: 0.74rem; }
+
+      .goal-header { padding: 14px 14px 10px; gap: 8px; }
+      .goal-title { font-size: 1rem; }
+      .tasks-section { padding: 10px 14px 14px; }
+      .task-item { padding: 8px 8px; gap: 8px; }
+
+      .focus-header { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+      .focus-header span { display: none; }
+      .focus-body { padding: 10px 14px; }
+
+      .chart-section { padding: 16px 14px; }
+
+      .add-form { padding: 16px; }
+
+      .ai-section { padding: 32px 16px 48px; }
+      .chat-messages { max-height: 300px; }
+
+      .landing-features { grid-template-columns: repeat(2,1fr); gap: 10px; }
+      .landing-inner { padding: 20px 8px 20px; }
+      .landing-logo { font-size: clamp(2.8rem, 14vw, 4rem); }
+      .landing-features { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 24px; }
+      .landing-feature { padding: 14px 10px; }
+      .landing-feature .feat-icon { font-size: 1.2rem; margin-bottom: 6px; }
+      .landing-tagline { font-size: 0.95rem; margin-bottom: 24px; }
+      #landing { padding: 16px; }
+      .btn-get-started { width: 100%; }
+
+      .auth-card { padding: 28px 20px; }
+
+      .goal-actions { gap: 2px; }
+      .btn-icon { padding: 4px; font-size: 0.85rem; }
+
+      .suggestion-chips { gap: 6px; }
+      .chip { padding: 5px 10px; font-size: 0.76rem; }
+
+      .weekly-review-btn { padding: 10px 14px; }
+      .wbr-sub { display: none; }
+
+      .templates-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 400px) {
+      .stats-bar { grid-template-columns: repeat(3,1fr); }
+      .landing-features { grid-template-columns: 1fr 1fr; }
+      .sort-row { flex-wrap: wrap; }
+    }
+
+  </style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+
+<div id="landing">
+  <div class="landing-theme-row">
+    <span class="theme-toggle-label">Light</span>
+    <div class="toggle-track" id="landing-theme-track" onclick="toggleTheme();document.getElementById('theme-track').classList.toggle('on',document.documentElement.getAttribute('data-theme')==='dark');document.getElementById('landing-theme-track').classList.toggle('on',document.documentElement.getAttribute('data-theme')==='dark')">
+      <div class="toggle-thumb"></div>
+    </div>
+    <span class="theme-toggle-label">Dark</span>
+  </div>
+
+  <div class="landing-inner">
+
+    <div class="landing-logo"><em>Ascend</em></div><div style="font-family:'Instrument Serif',serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:400;color:var(--ink);margin-top:12px;margin-bottom:0;letter-spacing:-0.01em;line-height:1.2">Your goals, made reachable.</div>
+    <p class="landing-tagline">Add a goal, break it into tasks, and get 1% better everyday.</p>
+
+    <div class="landing-features">
+      <div class="landing-feature">
+        <span class="feat-icon">🎯</span>
+        <div class="feat-title">Set goals</div>
+        <div class="feat-desc">Break big ambitions into clear, actionable steps</div>
+      </div>
+      <div class="landing-feature">
+        <span class="feat-icon">📈</span>
+        <div class="feat-title">Track progress</div>
+        <div class="feat-desc">Visual progress bars, streaks and 7-day charts</div>
+      </div>
+      <div class="landing-feature">
+        <span class="feat-icon">🤖</span>
+        <div class="feat-title">AI coach</div>
+        <div class="feat-desc">Get personalised advice and let AI add goals for you</div>
+      </div>
+      <div class="landing-feature">
+        <span class="feat-icon">📌</span>
+        <div class="feat-title">Daily focus</div>
+        <div class="feat-desc">Pin tasks to today's focus so you know what matters</div>
+      </div>
+      <div class="landing-feature">
+        <span class="feat-icon">🔥</span>
+        <div class="feat-title">Stay consistent</div>
+        <div class="feat-desc">Streak tracking keeps you coming back every day</div>
+      </div>
+      <div class="landing-feature">
+        <span class="feat-icon">📋</span>
+        <div class="feat-title">Weekly review</div>
+        <div class="feat-desc">Reflect on wins and plan your next week with AI</div>
+      </div>
+    </div>
+
+    <button class="btn-get-started" onclick="dismissLanding(false)">Get started →</button>
+    <br>
+    <div class="landing-returning" id="returning-msg" style="display:none">
+      <button onclick="dismissLanding(false)">Welcome back — go to my goals</button>
+    </div>
+
+  </div>
+</div>
+
+
+
+<div id="auth-screen">
+  <div class="auth-card">
+    <h2>Welcome to <em>Ascend</em></h2>
+    <p id="auth-subtitle">Sign in to sync your goals across all your devices.</p>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-success" id="auth-success"></div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter') handleAuth()"/>
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleAuth()"/>
+    </div>
+    <button class="btn-auth" id="auth-btn" onclick="handleAuth()">Sign in</button>
+    <div class="auth-switch">
+      <span id="auth-switch-text">Don't have an account?</span>
+      <button onclick="toggleAuthMode()">Sign up</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:nowrap">
+    <div>
+      <h1><em>Ascend</em></h1>
+      <p>Add a goal, break it into tasks, and get 1% better everyday.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;margin-top:8px">
+      <div class="user-bar" id="user-bar" style="display:none">
+        <span class="user-email" id="user-email"></span>
+        <div class="sync-indicator"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Synced</span></div>
+        <button class="btn-signout" onclick="signOut()">Sign out</button>
+      </div>
+      <div class="theme-toggle">
+      <span class="theme-toggle-label" id="theme-label">Light</span>
+      <div class="toggle-track" id="theme-track" onclick="toggleTheme()">
+        <div class="toggle-thumb"></div>
+      </div>
+      <span class="theme-toggle-label" id="theme-label-dark">Dark</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="setup-banner" id="setup-banner" style="display:none!important">
+  <p>🔌 <strong>Connect Supabase</strong> to sync your goals across devices.</p>
+  <input type="text" id="sb-url" placeholder="https://xxxx.supabase.co"/>
+  <input type="text" id="sb-key" placeholder="anon key (eyJ…)"/>
+  <button class="btn-connect" onclick="connectSupabase()">Connect</button>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="num" id="stat-total">0</div><div class="lbl">Goals set</div></div>
+  <div class="stat-card"><div class="num" id="stat-complete">0</div><div class="lbl">Completed</div></div>
+  <div class="stat-card"><div class="num" id="stat-tasks">0</div><div class="lbl">Tasks done</div></div>
+</div>
+
+<div class="focus-section">
+  <div class="focus-header">
+    <div class="focus-header-left">
+      <div class="focus-title">Today's focus</div>
+      <div class="streak-badge" id="streak-badge">🔥 <span id="streak-count">0</span> day streak</div>
+    </div>
+    <span style="font-size:0.78rem;color:var(--ink-muted)">Pin tasks from your goals below</span>
+  </div>
+  <div class="focus-body" id="focus-body">
+    <div class="focus-empty">No tasks pinned yet — hover a task and click the pin icon to add it here.</div>
+  </div>
+</div>
+
+<div class="chart-section">
+  <div class="chart-title">Tasks completed — last 7 days</div>
+  <div class="chart-bars" id="chart-bars"></div>
+</div>
+
+<div class="templates-section">
+  <button class="templates-toggle" onclick="toggleTemplates()">
+    <span id="tmpl-arrow">▸</span> Quick start templates
+  </button>
+  <div class="templates-grid" id="templates-grid">
+  </div>
+</div>
+
+<div class="add-form">
+  <h2>Add a new goal</h2>
+  <div class="form-row">
+    <div class="date-field" style="flex:1;min-width:180px">
+      <label class="date-label">Goal</label>
+      <input type="text" id="goal-input" style="width:100%" placeholder="e.g. Learn JavaScript, Run a 5K, Save £1000…" maxlength="80"/>
+    </div>
+    <div class="date-field">
+      <label class="date-label">Category</label>
+      <select class="cat-select" id="goal-cat">
+        <option value="other">📌 Other</option>
+        <option value="health">💪 Health</option>
+        <option value="career">💼 Career</option>
+        <option value="learning">📚 Learning</option>
+        <option value="finance">💰 Finance</option>
+        <option value="personal">🌱 Personal</option>
+      </select>
+    </div>
+    <div class="date-field">
+      <label class="date-label">Priority Level</label>
+      <select class="cat-select" id="goal-priority">
+        <option value="medium">🟠 Medium</option>
+        <option value="high">🔴 High</option>
+        <option value="low">🟢 Low</option>
+      </select>
+    </div>
+    <div class="date-field">
+      <label class="date-label">Complete by</label>
+      <input type="date" id="goal-due" class="cat-select" title="Complete by (optional)"/>
+    </div>
+    <button class="btn-primary" onclick="addGoal()">Add goal</button>
+  </div>
+</div>
+
+<div class="filter-row">
+  <label class="filter-label">Show</label>
+  <select class="filter-select" id="filter-select" onchange="setFilter(this.value)">
+    <option value="all">All goals</option>
+    <option value="active">In progress</option>
+    <option value="complete">Completed</option>
+    <option value="health">💪 Health</option>
+    <option value="career">💼 Career</option>
+    <option value="learning">📚 Learning</option>
+    <option value="finance">💰 Finance</option>
+    <option value="personal">🌱 Personal</option>
+    <option value="other">📌 Other</option>
+  </select>
+</div>
+
+<div class="sort-row">
+  <span class="sort-label">Sort by</span>
+  <button class="sort-btn active" onclick="setSort('default',this)">Default</button>
+  <button class="sort-btn" onclick="setSort('priority',this)">Priority</button>
+  <button class="sort-btn" onclick="setSort('due',this)">Due date</button>
+  <button class="sort-btn" onclick="setSort('progress',this)">Progress</button>
+</div>
+<div class="goals-list" id="goals-list"></div>
+
+<div class="archived-section" id="archived-section" style="display:none">
+  <button class="archived-toggle" onclick="toggleArchivedView()">
+    <span id="archived-arrow">▸</span>
+    <span id="archived-toggle-label">Archived goals</span>
+  </button>
+  <div class="archived-list" id="archived-list" style="display:none"></div>
+</div>
+
+<!-- AI COACH -->
+<div class="ai-section">
+  <div class="ai-inner">
+    <div class="ai-header">
+      <h2>Your <em>AI coach</em></h2>
+      <p>Ask for help breaking down a goal, staying motivated, building accountability habits, or any life and productivity question you have.</p>
+    </div>
+
+    <div class="api-setup" id="api-setup-box">
+      <div style="width:100%">
+        <div style="font-size:0.86rem;color:#D8D4CE;font-weight:500;margin-bottom:10px">🔑 Connect your free AI key</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <span style="background:#E08A5A;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:500;flex-shrink:0;margin-top:1px">1</span>
+            <span style="font-size:0.82rem;color:#B0ADA8;line-height:1.5">Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#E08A5A;text-decoration:none">aistudio.google.com</a> and sign in with Google</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <span style="background:#E08A5A;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:500;flex-shrink:0;margin-top:1px">2</span>
+            <span style="font-size:0.82rem;color:#B0ADA8;line-height:1.5">Click <strong style="color:#D8D4CE">"Get API key"</strong> → <strong style="color:#D8D4CE">"Create API key"</strong> and copy it</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <span style="background:#E08A5A;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:500;flex-shrink:0;margin-top:1px">3</span>
+            <span style="font-size:0.82rem;color:#B0ADA8;line-height:1.5">Paste it below — it's free, no card needed, and stays only on your device</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input type="password" id="api-key-input" placeholder="Paste your key here (AIza…)" maxlength="200"
+            style="flex:1;min-width:180px;background:var(--ai-bg);border:1px solid var(--ai-border);border-radius:7px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:0.86rem;color:#F5F2EC;outline:none;"/>
+          <button class="btn-save-key" onclick="saveKey()">Save key</button>
+          <span class="key-status unset" id="key-status">Not set</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="proactive-notices" class="proactive-notices"></div>
+
+    <button class="weekly-review-btn" onclick="triggerWeeklyReview()">
+      <div class="wbr-left">
+        <span class="wbr-icon">📋</span>
+        <div>
+          <div class="wbr-label">Weekly review</div>
+          <div class="wbr-sub">Get a summary of your week and focus areas for next week</div>
+        </div>
+      </div>
+      <span class="wbr-arrow">→</span>
+    </button>
+
+    <div class="suggestion-chips">
+      <button class="chip" onclick="useChip(this)">Add a goal to learn JavaScript for me</button>
+      <button class="chip" onclick="useChip(this)">How do I break a big goal into steps?</button>
+      <button class="chip" onclick="useChip(this)">I keep losing motivation — help</button>
+      <button class="chip" onclick="useChip(this)">How do I build a daily habit?</button>
+      <button class="chip" onclick="useChip(this)">I'm overwhelmed by my goals</button>
+      <button class="chip" onclick="useChip(this)">How do I hold myself accountable?</button>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-bubble">Hi! I'm your goal coach. I can give advice on breaking down goals, staying motivated, and building habits — and I can also <strong>add goals and tasks directly into your app</strong> for you. Just say something like "add a goal to learn Spanish" and I'll set it up. What are you working on?</div>
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <textarea id="chat-input" placeholder="Ask your coach anything…"
+        onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="btn-send" id="send-btn" onclick="sendMessage()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M2 9L16 9M16 9L10 3M16 9L10 15" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <p class="ai-disclaimer">
+      The AI coach uses Google's Gemini — completely free, no credit card needed. Your key is saved only on your own device and never shared with anyone.
+      <button onclick="document.getElementById('api-setup-box').style.display='block'" style="background:none;border:none;color:#E08A5A;font-size:0.75rem;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif;text-decoration:underline;margin-left:4px">Change key</button>
+    </p>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  let goals       = JSON.parse(localStorage.getItem('focus-goals')   || '[]');
+  let pinnedTasks = JSON.parse(localStorage.getItem('focus-pinned')  || '[]');
+  let activityLog = JSON.parse(localStorage.getItem('focus-activity')|| '[]');
+  let filter = 'all';
+  let sortMode = 'default';
+  let chatHistory = [];
+
+  function save()    { localStorage.setItem('focus-goals',    JSON.stringify(goals)); }
+  function savePin() { localStorage.setItem('focus-pinned',   JSON.stringify(pinnedTasks)); }
+  function saveLog() { localStorage.setItem('focus-activity', JSON.stringify(activityLog)); }
+
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function pct(g) {
+    if (!g.tasks.length) return 0;
+    return Math.round(g.tasks.filter(t => t.done).length / g.tasks.length * 100);
+  }
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function catLabel(c) {
+    return {health:'💪 Health',career:'💼 Career',learning:'📚 Learning',finance:'💰 Finance',personal:'🌱 Personal',other:'📌 Other'}[c]||'📌 Other';
+  }
+  function todayStr() { return new Date().toISOString().slice(0,10); }
+
+  // ── PRIORITY ──
+  const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+  const PRIORITY_LABEL = { high: '🔴 High', medium: '🟠 Medium', low: '🟢 Low' };
+  const PRIORITY_CLASS = { high: 'priority-high', medium: 'priority-medium', low: 'priority-low' };
+
+  // ── DUE DATE helpers ──
+  function dueDays(dateStr) {
+    if (!dateStr) return null;
+    const diff = new Date(dateStr) - new Date(todayStr());
+    return Math.round(diff / 86400000);
+  }
+  function dueLabel(dateStr) {
+    if (!dateStr) return null;
+    const d = dueDays(dateStr);
+    if (d < 0)  return { text: `${Math.abs(d)}d overdue`, cls: 'overdue' };
+    if (d === 0) return { text: 'Due today', cls: 'soon' };
+    if (d <= 3)  return { text: `Due in ${d}d`, cls: 'soon' };
+    // format date nicely
+    const dt = new Date(dateStr + 'T00:00:00');
+    return { text: 'Due ' + dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' }), cls: '' };
+  }
+
+  // ── ACTIVITY LOG ──
+  function logActivity() {
+    const today = todayStr();
+    const entry = activityLog.find(e => e.date === today);
+    if (entry) entry.count++;
+    else activityLog.push({ date: today, count: 1 });
+    activityLog = activityLog.slice(-30);
+    saveLog();
+  }
+
+  // ── STREAK ──
+  function calcStreak() {
+    let streak = 0;
+    const d = new Date();
+    for (let i = 0; i < 365; i++) {
+      const key = d.toISOString().slice(0,10);
+      if (activityLog.find(e => e.date === key && e.count > 0)) {
+        streak++; d.setDate(d.getDate() - 1);
+      } else {
+        if (i === 0) { d.setDate(d.getDate() - 1); continue; }
+        break;
+      }
+    }
+    return streak;
+  }
+  function updateStreak() {
+    const s = calcStreak();
+    document.getElementById('streak-badge').innerHTML = `🔥 <span id="streak-count">${s}</span> day streak`;
+  }
+
+  // ── CHART ──
+  function renderChart() {
+    const container = document.getElementById('chart-bars');
+    container.innerHTML = '';
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const today = new Date();
+    const cols = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today); d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0,10);
+      const entry = activityLog.find(e => e.date === key);
+      cols.push({ day: days[d.getDay()], count: entry ? entry.count : 0, isToday: i === 0 });
+    }
+    const max = Math.max(...cols.map(c => c.count), 1);
+    cols.forEach(col => {
+      const barH = col.count > 0 ? Math.max((col.count / max) * 100, 10) : 4;
+      const div = document.createElement('div');
+      div.className = 'chart-col';
+      div.innerHTML = `
+        <div class="chart-count">${col.count > 0 ? col.count : ''}</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar${col.isToday?' today':''}${col.count===0?' zero':''}" style="height:${barH}%"></div>
+        </div>
+        <div class="chart-day" style="${col.isToday?'color:var(--accent);font-weight:500':''}">${col.day}</div>`;
+      container.appendChild(div);
+    });
+  }
+
+  // ── TODAY'S FOCUS ──
+  function isPinned(goalId, taskId) {
+    return pinnedTasks.some(p => p.goalId === goalId && p.taskId === taskId);
+  }
+  function togglePin(goalId, taskId, goalTitle) {
+    if (isPinned(goalId, taskId)) {
+      pinnedTasks = pinnedTasks.filter(p => !(p.goalId === goalId && p.taskId === taskId));
+    } else {
+      if (pinnedTasks.length >= 5) { alert('You can pin up to 5 tasks at a time.'); return; }
+      pinnedTasks.push({ goalId, taskId, goalTitle });
+    }
+    savePin(); renderFocus(); render();
+  }
+  function unpinTask(goalId, taskId) {
+    pinnedTasks = pinnedTasks.filter(p => !(p.goalId === goalId && p.taskId === taskId));
+    savePin(); renderFocus(); render();
+  }
+  function renderFocus() {
+    const body = document.getElementById('focus-body');
+    const resolved = pinnedTasks.map(p => {
+      const g = goals.find(g => g.id === p.goalId);
+      const t = g && g.tasks.find(t => t.id === p.taskId);
+      return t ? { ...p, task: t, goalTitle: g.title } : null;
+    }).filter(Boolean);
+    if (!resolved.length) {
+      body.innerHTML = '<div class="focus-empty">No tasks pinned yet — hover a task and click the 📌 icon to add it here.</div>';
+      return;
+    }
+    body.innerHTML = resolved.map(p => `
+      <div class="focus-task${p.task.done?' done':''}">
+        <div class="task-check" onclick="toggleTask('${p.goalId}','${p.taskId}');renderFocus();" style="${p.task.done?'background:var(--done-ink);border-color:var(--done-ink)':''}">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none" style="${p.task.done?'':'display:none'}"><path d="M1 3.5L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="flex:1">
+          <div class="task-label">${p.task.done?'<s style="color:var(--done-ink)">':''}${escHtml(p.task.label)}${p.task.done?'</s>':''}</div>
+          <div class="focus-task-goal">${escHtml(p.goalTitle)}</div>
+        </div>
+        <button class="btn-unpin" title="Unpin" onclick="unpinTask('${p.goalId}','${p.taskId}')">✕</button>
+      </div>`).join('');
+  }
+
+  // ── NOTES ──
+  function toggleNotes(goalId) {
+    const wrap = document.getElementById('notes-wrap-' + goalId);
+    const btn  = document.getElementById('notes-btn-' + goalId);
+    const hidden = wrap.classList.toggle('notes-hidden');
+    btn.textContent = hidden ? '▸ Notes' : '▾ Notes';
+  }
+  function saveNote(goalId, val) {
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    g.notes = val; save();
+    syncGoalToSupabase(g);
+  }
+
+  // ── GOALS CRUD ──
+  function addGoal() {
+    const inp  = document.getElementById('goal-input');
+    const cat  = document.getElementById('goal-cat').value;
+    const pri  = document.getElementById('goal-priority').value;
+    const due  = document.getElementById('goal-due').value;
+    const title = inp.value.trim(); if (!title) return;
+    const newG = { id: uid(), title, cat, priority: pri, due: due||'', notes: '', tasks: [] };
+    goals.unshift(newG);
+    save(); inp.value = '';
+    document.getElementById('goal-due').value = '';
+    render();
+    syncGoalToSupabase(newG);
+    setTimeout(() => { const f = document.querySelector('.add-task-row input'); if(f) f.focus(); }, 60);
+  }
+  function deleteGoal(id) {
+    if (!confirm('Remove this goal and all its tasks?')) return;
+    pinnedTasks = pinnedTasks.filter(p => p.goalId !== id); savePin();
+    goals = goals.filter(g => g.id !== id); save(); render(); renderFocus();
+    deleteGoalFromSupabase(id);
+  }
+  function addTask(goalId, el) {
+    const label = el.value.trim(); if (!label) return;
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    const newT = { id: uid(), label, done: false };
+    g.tasks.push(newT);
+    save(); el.value = ''; renderGoal(g);
+    syncTaskToSupabase(goalId, newT);
+  }
+  function toggleTask(goalId, taskId) {
+    const g = goals.find(g => g.id === goalId);
+    const t = g && g.tasks.find(t => t.id === taskId); if (!t) return;
+    const wasDone = t.done; t.done = !t.done;
+    if (!wasDone && t.done) { logActivity(); syncActivityToSupabase(); }
+    const wasComplete = pct(g) === 100;
+    save(); renderGoal(g); updateStats(); updateStreak(); renderChart();
+    syncTaskToSupabase(goalId, t);
+    // Check if goal just became complete
+    if (!wasComplete && pct(g) === 100 && g.tasks.length) {
+      setTimeout(() => {
+        const card = document.getElementById('card-' + goalId);
+        if (card) card.classList.add('just-completed');
+        launchConfetti();
+      }, 200);
+    }
+  }
+  function deleteTask(goalId, taskId) {
+    pinnedTasks = pinnedTasks.filter(p => !(p.goalId===goalId && p.taskId===taskId)); savePin();
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    g.tasks = g.tasks.filter(t => t.id !== taskId);
+    save(); renderGoal(g); updateStats(); renderFocus();
+    deleteTaskFromSupabase(taskId);
+  }
+
+  // ── FILTER & SORT ──
+  function setFilter(f) { filter = f; render(); }
+  function setSort(s, el) {
+    sortMode = s;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active'); render();
+  }
+  function filteredGoals() {
+    let list = goals.filter(g => !g.archived);
+    if (filter === 'active')   list = list.filter(g => pct(g) < 100);
+    else if (filter === 'complete') list = list.filter(g => pct(g) === 100 && g.tasks.length);
+    else if (filter !== 'all') list = list.filter(g => g.cat === filter);
+    if (sortMode === 'priority') {
+      list.sort((a,b) => (PRIORITY_ORDER[a.priority||'medium']||1) - (PRIORITY_ORDER[b.priority||'medium']||1));
+    } else if (sortMode === 'due') {
+      list.sort((a,b) => {
+        if (!a.due && !b.due) return 0;
+        if (!a.due) return 1; if (!b.due) return -1;
+        return a.due.localeCompare(b.due);
+      });
+    } else if (sortMode === 'progress') {
+      list.sort((a,b) => pct(b) - pct(a));
+    }
+    return list;
+  }
+
+  // ── STATS ──
+  function updateStats() {
+    const active = goals.filter(g => !g.archived);
+    document.getElementById('stat-total').textContent    = active.length;
+    document.getElementById('stat-complete').textContent = active.filter(g => pct(g)===100 && g.tasks.length).length;
+    document.getElementById('stat-tasks').textContent    = active.reduce((a,g) => a + g.tasks.filter(t=>t.done).length, 0);
+  }
+
+  // ── RENDER ──
+  function renderGoal(g) {
+    const el = document.getElementById('card-' + g.id);
+    if (!el) { render(); return; }
+    el.replaceWith(buildCard(g)); updateStats();
+  }
+  function buildCard(g) {
+    const p = pct(g), complete = p === 100 && g.tasks.length;
+    const due = dueLabel(g.due);
+    const pri = g.priority || 'medium';
+    const card = document.createElement('div');
+    card.className = 'goal-card'; card.id = 'card-' + g.id;
+    card.draggable = true;
+    card.innerHTML = `
+      <div class="goal-header">
+        <span class="drag-handle" title="Drag to reorder">⠿</span>
+        <div class="goal-title-wrap">
+          <div class="goal-meta">
+            <select class="meta-select cat-pill cat-${g.cat||'other'}"
+              onchange="saveGoalCat('${g.id}',this.value)">
+              <option value="other"   ${(g.cat||'other')==='other'   ?'selected':''}>📌 Other</option>
+              <option value="health"  ${g.cat==='health'  ?'selected':''}>💪 Health</option>
+              <option value="career"  ${g.cat==='career'  ?'selected':''}>💼 Career</option>
+              <option value="learning"${g.cat==='learning'?'selected':''}>📚 Learning</option>
+              <option value="finance" ${g.cat==='finance' ?'selected':''}>💰 Finance</option>
+              <option value="personal"${g.cat==='personal'?'selected':''}>🌱 Personal</option>
+            </select>
+            <select class="meta-select priority-pill ${PRIORITY_CLASS[pri]}"
+              onchange="saveGoalPriority('${g.id}',this.value)">
+              <option value="high"   ${pri==='high'  ?'selected':''}>🔴 High</option>
+              <option value="medium" ${pri==='medium'?'selected':''}>🟠 Medium</option>
+              <option value="low"    ${pri==='low'   ?'selected':''}>🟢 Low</option>
+            </select>
+            ${due ? `<span class="due-pill ${due.cls}">📅 ${due.text}</span>` : ''}
+          </div>
+          <input class="editable-title" value="${escHtml(g.title)}"
+            onblur="saveGoalTitle('${g.id}',this.value)"
+            onkeydown="if(event.key==='Enter'){this.blur()}"
+            title="Click to edit"/>
+          ${complete ? '<span class="goal-badge">✓ Complete</span>' : ''}
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill${complete?' complete':''}" style="width:${p}%"></div></div>
+            <span class="progress-pct">${p}%</span>
+          </div>
+        </div>
+        <div class="goal-actions">
+          <button class="btn-icon" title="Ask AI coach about this goal" onclick="askAboutGoal('${escHtml(g.title)}')">✦</button>
+          <button class="btn-archive btn-icon" title="Archive goal" onclick="archiveGoal('${g.id}')">📦</button>
+          <button class="btn-icon" title="Delete goal" onclick="deleteGoal('${g.id}')">✕</button>
+        </div>
+      </div>
+      <div class="tasks-section">
+        <ul class="tasks-list">${g.tasks.map(t => `
+          <li class="task-item${t.done?' done':''}" id="task-li-${t.id}">
+            <div class="task-check" onclick="toggleTask('${g.id}','${t.id}')">
+              <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 3.5L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <input class="editable-task${t.done?' task-done-edit':''}" value="${escHtml(t.label)}"
+                  onblur="saveTaskLabel('${g.id}','${t.id}',this.value)"
+                  onkeydown="if(event.key==='Enter'){this.blur()}"
+                  title="Click to edit" ${t.done?'style="color:var(--done-ink);text-decoration:line-through;text-decoration-color:#98C494"':''}/>
+                ${t.recur ? `<span class="recur-pill">${t.recur==='daily'?'↻ Daily':'↻ Weekly'}</span>` : ''}
+                ${t.due ? `<span class="task-due-pill ${taskDueCls(t.due)}" onclick="editTaskDue('${g.id}','${t.id}')">📅 ${taskDueLabel(t.due)}</span>` : ''}
+                ${(t.subtasks||[]).length ? `<span class="subtask-progress">${(t.subtasks||[]).filter(s=>s.done).length}/${(t.subtasks||[]).length} steps</span>` : ''}
+              </div>
+            </div>
+            <button class="btn-subtasks${(t.subtasks||[]).length?' has-subs':''}" title="Subtasks" onclick="toggleSubtasks('${g.id}','${t.id}')">⊞</button>
+            <button class="btn-recur${t.recur?' active':''}" title="Set recurring" onclick="cycleRecur('${g.id}','${t.id}')">↻</button>
+            <button class="btn-pin${isPinned(g.id,t.id)?' pinned':''}" title="Pin to today's focus" onclick="togglePin('${g.id}','${t.id}','${escHtml(g.title)}')">📌</button>
+            <button class="btn-delete-task" onclick="deleteTask('${g.id}','${t.id}')">✕</button>
+          </li>
+          <div class="subtasks-wrap" id="subtasks-${t.id}">
+            <ul class="subtask-list">${(t.subtasks||[]).map(s=>`
+              <li class="subtask-item${s.done?' done':''}">
+                <div class="subtask-check" onclick="toggleSubtask('${g.id}','${t.id}','${s.id}')">
+                  <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 2.5L3 5L7 1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <input class="subtask-label" value="${escHtml(s.label)}"
+                  onblur="saveSubtaskLabel('${g.id}','${t.id}','${s.id}',this.value)"
+                  onkeydown="if(event.key==='Enter')this.blur()"
+                  ${s.done?'style="color:var(--done-ink);text-decoration:line-through"':''}/>
+                <button class="btn-del-subtask" onclick="deleteSubtask('${g.id}','${t.id}','${s.id}')">✕</button>
+              </li>`).join('')}
+            </ul>
+            <div class="add-subtask-row">
+              <input type="text" id="sub-input-${t.id}" placeholder="Add a step…" maxlength="80"
+                onkeydown="if(event.key==='Enter') addSubtask('${g.id}','${t.id}',this)"/>
+              <button class="btn-add-subtask" onclick="addSubtask('${g.id}','${t.id}',document.getElementById('sub-input-${t.id}'))">+ Step</button>
+            </div>
+          </div>`).join('')}
+        </ul>
+        <div class="add-task-row">
+          <input type="text" id="task-input-${g.id}" placeholder="Add a task…" maxlength="100"
+            onkeydown="if(event.key==='Enter') addTask('${g.id}',this)"/>
+          <button class="btn-add-task" onclick="addTask('${g.id}',document.getElementById('task-input-${g.id}'))">+ Task</button>
+        </div>
+      </div>
+      <div class="notes-section">
+        <button class="notes-toggle" id="notes-btn-${g.id}" onclick="toggleNotes('${g.id}')">
+          ▸ Notes${g.notes ? ' ●' : ''}
+        </button>
+        <div id="notes-wrap-${g.id}" class="notes-hidden">
+          <textarea class="notes-area" placeholder="Jot down ideas, context, or progress thoughts…"
+            oninput="saveNote('${g.id}', this.value)">${escHtml(g.notes||'')}</textarea>
+        </div>
+      </div>`;
+    // Drag events
+    card.addEventListener('dragstart', e => { dragSrcId = g.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    card.addEventListener('dragend',   () => { card.classList.remove('dragging'); document.querySelectorAll('.goal-card').forEach(c=>c.classList.remove('drag-over')); });
+    card.addEventListener('dragover',  e => { e.preventDefault(); if(dragSrcId !== g.id) card.classList.add('drag-over'); });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault(); card.classList.remove('drag-over');
+      if (dragSrcId === g.id) return;
+      const fromIdx = goals.findIndex(x => x.id === dragSrcId);
+      const toIdx   = goals.findIndex(x => x.id === g.id);
+      if (fromIdx < 0 || toIdx < 0) return;
+      const [moved] = goals.splice(fromIdx, 1);
+      goals.splice(toIdx, 0, moved);
+      save(); render();
+      goals.forEach((g,i) => syncGoalToSupabase(g));
+    });
+    return card;
+  }
+  function render() {
+    const list = document.getElementById('goals-list');
+    list.innerHTML = '';
+    const vis = filteredGoals();
+    if (!vis.length) {
+      list.innerHTML = `<div class="empty-state"><span class="icon">◎</span><p>${goals.filter(g=>!g.archived).length?'No goals match this filter.':'No goals yet — add your first one above.'}</p></div>`;
+      updateStats(); renderArchived(); return;
+    }
+    vis.forEach(g => list.appendChild(buildCard(g))); updateStats(); renderArchived(); buildProactiveNotices();
+  }
+  document.getElementById('goal-input').addEventListener('keydown', e => { if(e.key==='Enter') addGoal(); });
+
+  // ── API KEY ──
+  function saveKey() {
+    const v = document.getElementById('api-key-input').value.trim(); if (!v) return;
+    localStorage.setItem('focus-gemini-key', v);
+    document.getElementById('api-key-input').value = ''; updateKeyStatus();
+  }
+  function getKey() { return localStorage.getItem('focus-gemini-key') || ''; }
+  function updateKeyStatus() {
+    const el = document.getElementById('key-status');
+    const box = document.getElementById('api-setup-box');
+    if (getKey()) {
+      if (el) { el.textContent = '✓ Key saved'; el.className = 'key-status set'; }
+      if (box) box.style.display = 'none';
+    } else {
+      if (el) { el.textContent = 'Not set'; el.className = 'key-status unset'; }
+      if (box) box.style.display = 'block';
+    }
+  }
+
+  // ── AI CHAT ──
+
+  // ── PROACTIVE NOTICES ──
+  function buildProactiveNotices() {
+    const container = document.getElementById('proactive-notices');
+    if (!container) return;
+    const active = goals.filter(g => !g.archived);
+    const notices = [];
+
+    // High priority goals with no tasks
+    const noTaskHighPri = active.filter(g => g.priority === 'high' && !g.tasks.length);
+    noTaskHighPri.forEach(g => notices.push({
+      icon: '⚠️',
+      text: `<strong>${escHtml(g.title)}</strong> is high priority but has no tasks yet.`,
+      action: 'Break it down',
+      msg: `Help me break down this high priority goal into tasks: "${g.title}"`
+    }));
+
+    // Overdue goals
+    const overdue = active.filter(g => g.due && dueDays(g.due) < 0 && pct(g) < 100);
+    overdue.forEach(g => notices.push({
+      icon: '📅',
+      text: `<strong>${escHtml(g.title)}</strong> is overdue by ${Math.abs(dueDays(g.due))} day(s).`,
+      action: 'Get advice',
+      msg: `My goal "${g.title}" is overdue. Help me get back on track.`
+    }));
+
+    // Goals stuck at same progress (0% with tasks but nothing done)
+    const stuck = active.filter(g => g.tasks.length >= 2 && pct(g) === 0);
+    stuck.slice(0, 1).forEach(g => notices.push({
+      icon: '💤',
+      text: `<strong>${escHtml(g.title)}</strong> hasn't been started yet — ${g.tasks.length} tasks waiting.`,
+      action: 'Get motivated',
+      msg: `I haven't started on my goal "${g.title}" yet. How do I get going?`
+    }));
+
+    // Almost there — goals between 75-99%
+    const almostDone = active.filter(g => pct(g) >= 75 && pct(g) < 100 && g.tasks.length);
+    almostDone.slice(0, 1).forEach(g => notices.push({
+      icon: '🏁',
+      text: `<strong>${escHtml(g.title)}</strong> is ${pct(g)}% done — almost there!`,
+      action: 'Finish strong',
+      msg: `I'm ${pct(g)}% done with my goal "${g.title}". Help me finish strong.`
+    }));
+
+    if (!notices.length) { container.style.display = 'none'; return; }
+    container.style.display = 'flex';
+    container.innerHTML = notices.slice(0, 3).map(n => `
+      <div class="notice-card">
+        <span class="notice-icon">${n.icon}</span>
+        <span class="notice-text">${n.text}</span>
+        <button class="btn-notice-action" onclick="useNotice(${JSON.stringify(n.msg).replace(/'/g,'&#39;')})">${n.action}</button>
+      </div>`).join('');
+  }
+  function useNotice(msg) {
+    document.getElementById('chat-input').value = msg;
+    document.getElementById('chat-input').focus();
+  }
+
+  // ── WEEKLY REVIEW ──
+  function triggerWeeklyReview() {
+    const active = goals.filter(g => !g.archived);
+    const completedThisWeek = active.filter(g => pct(g) === 100 && g.tasks.length).length;
+    const totalTasks = active.reduce((a,g) => a + g.tasks.length, 0);
+    const doneTasks  = active.reduce((a,g) => a + g.tasks.filter(t=>t.done).length, 0);
+    const streak = calcStreak();
+    const overdue = active.filter(g => g.due && dueDays(g.due) < 0 && pct(g) < 100);
+    const highPri = active.filter(g => g.priority === 'high' && pct(g) < 100);
+
+    const reviewPrompt = `Please give me a weekly review based on my current progress:
+
+Goals: ${active.length} active, ${completedThisWeek} fully completed
+Tasks: ${doneTasks} of ${totalTasks} done (${totalTasks ? Math.round(doneTasks/totalTasks*100) : 0}%)
+Streak: ${streak} days
+Overdue goals: ${overdue.map(g=>g.title).join(', ') || 'none'}
+High priority incomplete: ${highPri.map(g=>`${g.title} (${pct(g)}%)`).join(', ') || 'none'}
+All goals: ${active.map(g=>`${g.title} — ${pct(g)}% (${g.priority} priority)`).join('; ')}
+
+Please:
+1. Celebrate what went well this week
+2. Be honest about what needs attention
+3. Suggest my top 3 focus areas for next week
+4. Give one practical tip to keep momentum going`;
+
+    document.getElementById('chat-input').value = reviewPrompt;
+    sendMessage();
+    document.getElementById('chat-messages').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function useChip(el) {
+    document.getElementById('chat-input').value = el.textContent;
+    document.getElementById('chat-input').focus();
+  }
+  function askAboutGoal(title) {
+    document.getElementById('chat-input').value = `I have a goal: "${title}". Can you help me break it into clear steps and advise me on how to actually reach it?`;
+    document.getElementById('chat-input').focus();
+    document.querySelector('.ai-section').scrollIntoView({ behavior: 'smooth' });
+  }
+  function handleChatKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
+  function autoResize(el) { el.style.height='46px'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+  function appendMsg(role, text) {
+    const c = document.getElementById('chat-messages');
+    const d = document.createElement('div');
+    d.className = `msg ${role}`;
+    d.innerHTML = `<div class="msg-avatar">${role==='ai'?'AI':'You'}</div><div class="msg-bubble">${escHtml(text).replace(/\n/g,'<br>')}</div>`;
+    c.appendChild(d); c.scrollTop = c.scrollHeight;
+  }
+  function showTyping() {
+    const c = document.getElementById('chat-messages');
+    const d = document.createElement('div');
+    d.className='typing-indicator'; d.id='typing';
+    d.innerHTML=`<div class="msg-avatar" style="width:30px;height:30px;border-radius:50%;background:#E08A5A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:500;flex-shrink:0">AI</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+    c.appendChild(d); c.scrollTop=c.scrollHeight;
+  }
+  function hideTyping() { const el=document.getElementById('typing'); if(el) el.remove(); }
+
+  async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text  = input.value.trim(); if (!text) return;
+    const key   = getKey();
+    if (!key) { alert('Please enter and save your Gemini API key first.'); document.getElementById('api-key-input').focus(); return; }
+    input.value=''; input.style.height='46px';
+    document.getElementById('send-btn').disabled=true;
+    appendMsg('user',text);
+    chatHistory.push({role:'user',content:text});
+    showTyping();
+    const goalSummary = goals.length
+      ? goals.map(g=>`- ${g.title} (${pct(g)}% done, ${g.priority||'medium'} priority${g.due?', due '+g.due:''})`).join('\n')
+      : 'No goals set yet.';
+    const systemPrompt = `You are a warm, practical goal-setting and productivity coach built into a goal-tracking app. You can both give advice AND add goals/tasks directly into the app for the user.
+
+ADDING GOALS: If the user asks you to add a goal, create a goal, or suggests they want to work on something, include a JSON block at the very end of your response in this exact format:
+\`\`\`json
+{"action":"add_goals","goals":[{"title":"Goal title here","category":"health","priority":"medium","due":"","tasks":["Task 1","Task 2","Task 3"]}]}
+\`\`\`
+Categories must be one of: health, career, learning, finance, personal, other
+Priority must be one of: high, medium, low
+Due is optional — use "" if none, or "YYYY-MM-DD" format
+Always suggest 3-5 practical tasks per goal.
+Only include the JSON block when actually adding goals — not for general advice.
+
+User's current goals:
+${goalSummary}
+Current streak: ${calcStreak()} days
+
+Keep responses concise, warm, and practical. When adding a goal, briefly explain what you've added and why you chose those tasks.`;
+
+    const geminiContents = [
+      {role:'user', parts:[{text:systemPrompt}]},
+      {role:'model',parts:[{text:"Understood! I'm ready to help as a goal coach and can add goals directly to your app."}]},
+      ...chatHistory.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}))
+    ];
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+        {method:'POST',headers:{'Content-Type':'application/json'},
+         body:JSON.stringify({contents:geminiContents,generationConfig:{maxOutputTokens:1000,temperature:0.7}})}
+      );
+      hideTyping();
+      if (!res.ok) {
+        const err=await res.json().catch(()=>({}));
+        appendMsg('ai',`Something went wrong: ${err?.error?.message||'Error '+res.status+'. Check your API key.'}`);
+        chatHistory.pop();
+      } else {
+        const data=await res.json();
+        const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||"Sorry, I couldn't generate a response.";
+        // Strip JSON block from display text and parse it
+        const jsonMatch = raw.match(/```json\s*([\s\S]*?)\s*```/);
+        const displayText = raw.replace(/```json[\s\S]*?```/,'').trim();
+        appendMsg('ai', displayText);
+        chatHistory.push({role:'assistant',content:displayText});
+        if(chatHistory.length>20) chatHistory=chatHistory.slice(-20);
+        // If AI included a goal action, execute it
+        if (jsonMatch) {
+          try {
+            const action = JSON.parse(jsonMatch[1]);
+            if (action.action === 'add_goals') parseAndAddGoals(action.goals);
+          } catch(e) { console.warn('Could not parse AI goal action', e); }
+        }
+      }
+    } catch(e) {
+      hideTyping();
+      appendMsg('ai','Network error — check your connection and try again.');
+      chatHistory.pop();
+    }
+    document.getElementById('send-btn').disabled=false;
+    input.focus();
+  }
+
+  function parseAndAddGoals(goalList) {
+    let added = 0;
+    goalList.forEach(g => {
+      if (!g.title) return;
+      const newGoal = {
+        id: uid(),
+        title: g.title,
+        cat: ['health','career','learning','finance','personal','other'].includes(g.category) ? g.category : 'other',
+        priority: ['high','medium','low'].includes(g.priority) ? g.priority : 'medium',
+        due: g.due || '',
+        notes: '',
+        tasks: (g.tasks || []).map(label => ({ id: uid(), label, done: false }))
+      };
+      goals.unshift(newGoal);
+      added++;
+    });
+    if (added > 0) {
+      save(); render();
+      // Scroll up to show the newly added goals
+      const goalsList = document.getElementById('goals-list');
+      if (goalsList) setTimeout(() => goalsList.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+    }
+  }
+
+  // ── EDIT INLINE ──
+  function saveGoalTitle(goalId, val) {
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    const trimmed = val.trim();
+    if (!trimmed) { renderGoal(g); return; }
+    g.title = trimmed; save(); renderGoal(g);
+    syncGoalToSupabase(g);
+  }
+  function saveGoalCat(goalId, val) {
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    g.cat = val; save(); renderGoal(g);
+    syncGoalToSupabase(g);
+  }
+  function saveGoalPriority(goalId, val) {
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    g.priority = val; save(); renderGoal(g);
+    syncGoalToSupabase(g);
+  }
+  function saveTaskLabel(goalId, taskId, val) {
+    const g = goals.find(g => g.id === goalId);
+    const t = g && g.tasks.find(t => t.id === taskId); if (!t) return;
+    const trimmed = val.trim();
+    if (!trimmed) { renderGoal(g); return; }
+    t.label = trimmed; save();
+  }
+
+  // ── DRAG STATE ──
+  let dragSrcId = null;
+
+  // ── ARCHIVE ──
+  function archiveGoal(id) {
+    const g = goals.find(g => g.id === id); if (!g) return;
+    g.archived = true; g.archivedAt = todayStr();
+    pinnedTasks = pinnedTasks.filter(p => p.goalId !== id); savePin();
+    save(); render(); renderArchived();
+    syncGoalToSupabase(g);
+  }
+  function restoreGoal(id) {
+    const g = goals.find(g => g.id === id); if (!g) return;
+    delete g.archived; delete g.archivedAt;
+    save(); render(); renderArchived();
+    syncGoalToSupabase(g);
+  }
+  function deleteArchivedGoal(id) {
+    if (!confirm('Permanently delete this archived goal?')) return;
+    goals = goals.filter(g => g.id !== id); save(); renderArchived();
+    deleteGoalFromSupabase(id);
+  }
+  function toggleArchivedView() {
+    const list = document.getElementById('archived-list');
+    const arrow = document.getElementById('archived-arrow');
+    const isHidden = list.style.display === 'none';
+    list.style.display = isHidden ? 'flex' : 'none';
+    arrow.textContent = isHidden ? '▾' : '▸';
+    if (isHidden) renderArchived();
+  }
+  function renderArchived() {
+    const archived = goals.filter(g => g.archived);
+    const section  = document.getElementById('archived-section');
+    const list     = document.getElementById('archived-list');
+    const label    = document.getElementById('archived-toggle-label');
+    section.style.display = archived.length ? 'block' : 'none';
+    label.textContent = `Archived goals (${archived.length})`;
+    if (list.style.display === 'none') return;
+    list.innerHTML = archived.map(g => `
+      <div class="archived-card">
+        <div class="archived-card-info">
+          <div class="archived-title">${escHtml(g.title)}</div>
+          <div class="archived-meta">${catLabel(g.cat||'other')} · ${g.tasks.length} tasks · archived ${g.archivedAt||''}</div>
+        </div>
+        <button class="btn-restore" onclick="restoreGoal('${g.id}')">Restore</button>
+        <button class="btn-delete-archived" onclick="deleteArchivedGoal('${g.id}')" title="Delete permanently">✕</button>
+      </div>`).join('');
+  }
+
+
+  // ── TASK DUE DATE HELPERS ──
+  function taskDueCls(dateStr) {
+    if (!dateStr) return '';
+    const d = dueDays(dateStr);
+    if (d < 0) return 'overdue';
+    if (d <= 3) return 'soon';
+    return '';
+  }
+  function taskDueLabel(dateStr) {
+    if (!dateStr) return '';
+    const d = dueDays(dateStr);
+    if (d < 0)  return `${Math.abs(d)}d overdue`;
+    if (d === 0) return 'Due today';
+    if (d <= 3)  return `Due in ${d}d`;
+    const dt = new Date(dateStr + 'T00:00:00');
+    return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  }
+  function editTaskDue(goalId, taskId) {
+    const g = goals.find(g => g.id === goalId);
+    const t = g && g.tasks.find(t => t.id === taskId); if (!t) return;
+    const val = prompt('Set due date for this task (YYYY-MM-DD), or leave blank to clear:', t.due || '');
+    if (val === null) return;
+    t.due = val.trim();
+    save(); renderGoal(g); syncTaskToSupabase(goalId, t);
+  }
+
+  // ── RECURRING TASKS ──
+  function cycleRecur(goalId, taskId) {
+    const g = goals.find(g => g.id === goalId);
+    const t = g && g.tasks.find(t => t.id === taskId); if (!t) return;
+    const cycle = [undefined, 'daily', 'weekly'];
+    const idx = cycle.indexOf(t.recur);
+    t.recur = cycle[(idx + 1) % cycle.length];
+    save(); renderGoal(g); syncTaskToSupabase(goalId, t);
+  }
+  function resetRecurringTasks() {
+    const today = todayStr();
+    const lastReset = localStorage.getItem('focus-last-reset');
+    if (lastReset === today) return;
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    const yStr = yesterday.toISOString().slice(0,10);
+    const lastWeek = new Date(); lastWeek.setDate(lastWeek.getDate()-7);
+    const wStr = lastWeek.toISOString().slice(0,10);
+    let changed = false;
+    goals.forEach(g => {
+      g.tasks.forEach(t => {
+        if (!t.recur || !t.done) return;
+        if (t.recur === 'daily') { t.done = false; t.lastReset = today; changed = true; }
+        if (t.recur === 'weekly' && (!t.lastReset || t.lastReset <= wStr)) { t.done = false; t.lastReset = today; changed = true; }
+      });
+    });
+    if (changed) { save(); render(); }
+    localStorage.setItem('focus-last-reset', today);
+  }
+
+  // ── SUBTASKS ──
+  function toggleSubtasks(goalId, taskId) {
+    const wrap = document.getElementById('subtasks-' + taskId);
+    if (!wrap) return;
+    wrap.classList.toggle('open');
+  }
+  function addSubtask(goalId, taskId, inputEl) {
+    const label = inputEl.value.trim(); if (!label) return;
+    const g = goals.find(g => g.id === goalId);
+    const t = g && g.tasks.find(t => t.id === taskId); if (!t) return;
+    if (!t.subtasks) t.subtasks = [];
+    t.subtasks.push({ id: uid(), label, done: false });
+    save(); inputEl.value = ''; renderGoal(g);
+    // Keep subtasks open after adding
+    setTimeout(() => {
+      const wrap = document.getElementById('subtasks-' + taskId);
+      if (wrap) wrap.classList.add('open');
+    }, 50);
+    syncTaskToSupabase(goalId, t);
+  }
+  function toggleSubtask(goalId, taskId, subtaskId) {
+    const g = goals.find(g => g.id === goalId);
+    const t = g && g.tasks.find(t => t.id === taskId); if (!t) return;
+    const s = (t.subtasks||[]).find(s => s.id === subtaskId); if (!s) return;
+    s.done = !s.done;
+    save(); renderGoal(g);
+    setTimeout(() => {
+      const wrap = document.getElementById('subtasks-' + taskId);
+      if (wrap) wrap.classList.add('open');
+    }, 50);
+    syncTaskToSupabase(goalId, t);
+  }
+  function deleteSubtask(goalId, taskId, subtaskId) {
+    const g = goals.find(g => g.id === goalId);
+    const t = g && g.tasks.find(t => t.id === taskId); if (!t) return;
+    t.subtasks = (t.subtasks||[]).filter(s => s.id !== subtaskId);
+    save(); renderGoal(g);
+    setTimeout(() => {
+      const wrap = document.getElementById('subtasks-' + taskId);
+      if (wrap && t.subtasks.length) wrap.classList.add('open');
+    }, 50);
+    syncTaskToSupabase(goalId, t);
+  }
+  function saveSubtaskLabel(goalId, taskId, subtaskId, val) {
+    const g = goals.find(g => g.id === goalId);
+    const t = g && g.tasks.find(t => t.id === taskId); if (!t) return;
+    const s = (t.subtasks||[]).find(s => s.id === subtaskId); if (!s) return;
+    s.label = val.trim() || s.label;
+    save(); syncTaskToSupabase(goalId, t);
+  }
+
+  // ── GOAL TEMPLATES ──
+  const TEMPLATES = [
+    { icon:'💪', name:'Get fit', cat:'health', priority:'high',
+      tasks:['Set a weekly workout schedule','Complete 3 workouts this week','Track meals for 7 days','Rest and recovery day','Measure progress monthly'] },
+    { icon:'📚', name:'Read more books', cat:'learning', priority:'medium',
+      tasks:['Choose next book to read','Read for 20 minutes daily','Take notes on key ideas','Finish current book','Review and share learnings'] },
+    { icon:'💰', name:'Save money', cat:'finance', priority:'high',
+      tasks:['Review monthly expenses','Set a savings target','Cancel unused subscriptions','Automate monthly savings','Track spending weekly'] },
+    { icon:'💼', name:'Get a new job', cat:'career', priority:'high',
+      tasks:['Update CV and LinkedIn','Apply to 5 jobs this week','Prepare for interviews','Follow up on applications','Build a portfolio project'] },
+    { icon:'🌱', name:'Build a habit', cat:'personal', priority:'medium',
+      tasks:['Define the habit clearly','Start with 2 minutes a day','Track streak daily','Identify triggers and rewards','Review progress after 30 days'] },
+    { icon:'🧘', name:'Reduce stress', cat:'health', priority:'medium',
+      tasks:['10 minute morning meditation','Walk outside daily','Limit screen time before bed','Journal for 5 minutes each day','Schedule one relaxing activity weekly'] },
+    { icon:'🎓', name:'Learn a new skill', cat:'learning', priority:'medium',
+      tasks:['Find a course or resource','Dedicate 30 minutes daily','Complete first module','Build a small practice project','Share what you have learned'] },
+    { icon:'🤝', name:'Improve relationships', cat:'personal', priority:'low',
+      tasks:['Reach out to one friend this week','Plan a social activity','Practice active listening','Express appreciation to someone','Spend quality time with family'] },
+  ];
+
+  function toggleTemplates() {
+    const grid = document.getElementById('templates-grid');
+    const arrow = document.getElementById('tmpl-arrow');
+    const isHidden = grid.style.display === 'none' || !grid.style.display;
+    grid.style.display = isHidden ? 'grid' : 'none';
+    arrow.textContent = isHidden ? '▾' : '▸';
+    if (isHidden && !grid.innerHTML.trim()) renderTemplates();
+  }
+  function renderTemplates() {
+    const grid = document.getElementById('templates-grid');
+    grid.innerHTML = TEMPLATES.map((t,i) => `
+      <div class="template-card" onclick="applyTemplate(${i})">
+        <span class="template-icon">${t.icon}</span>
+        <div class="template-name">${t.name}</div>
+        <div class="template-desc">${t.tasks.length} tasks ready to go</div>
+      </div>`).join('');
+  }
+  function applyTemplate(idx) {
+    const tmpl = TEMPLATES[idx]; if (!tmpl) return;
+    const newGoal = {
+      id: uid(), title: tmpl.name, cat: tmpl.cat,
+      priority: tmpl.priority, due: '', notes: '',
+      tasks: tmpl.tasks.map(label => ({ id: uid(), label, done: false, subtasks: [] }))
+    };
+    goals.unshift(newGoal);
+    save(); render();
+    syncGoalToSupabase(newGoal);
+    newGoal.tasks.forEach(t => syncTaskToSupabase(newGoal.id, t));
+    // Close templates panel
+    document.getElementById('templates-grid').style.display = 'none';
+    document.getElementById('tmpl-arrow').textContent = '▸';
+    // Scroll to new goal
+    setTimeout(() => {
+      const card = document.getElementById('card-' + newGoal.id);
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  }
+
+
+  // ── CONFETTI ──
+  function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    canvas.style.display = 'block';
+
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const colors = isDark
+      ? ['#E08A5A','#5AAA54','#5A80C8','#C89040','#9A60C8','#E06060']
+      : ['#C8602A','#4A7A44','#2E4E8A','#8A5A10','#6A3A7A','#A33030'];
+
+    const pieces = Array.from({length: 80}, () => ({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 100,
+      r: 4 + Math.random() * 6,
+      d: 2 + Math.random() * 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltSpeed: 0.1 + Math.random() * 0.2,
+      angle: 0,
+      opacity: 1
+    }));
+
+    let frame = 0;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        p.angle += p.tiltSpeed;
+        p.y += p.d;
+        p.x += Math.sin(p.angle) * 1.5;
+        p.opacity = Math.max(0, 1 - (p.y / canvas.height) * 1.2);
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y, p.r, p.r * 0.5, p.angle, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      frame++;
+      if (frame < 120) requestAnimationFrame(draw);
+      else { canvas.style.display = 'none'; ctx.clearRect(0,0,canvas.width,canvas.height); }
+    }
+    draw();
+  }
+
+  // ── THEME ──
+  function toggleTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('focus-theme', next);
+    document.getElementById('theme-track').classList.toggle('on', next === 'dark');
+  }
+  function initTheme() {
+    const saved = localStorage.getItem('focus-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.getElementById('theme-track').classList.toggle('on', saved === 'dark');
+  }
+
+
+  // ── LANDING ──
+  function dismissLanding(instant) {
+    const el = document.getElementById('landing');
+    if (instant) { el.style.display = 'none'; return; }
+    el.classList.add('hidden');
+    setTimeout(() => el.style.display = 'none', 500);
+    localStorage.setItem('focus-visited', '1');
+  }
+  function initLanding() {
+    const visited = localStorage.getItem('focus-visited');
+    const hasGoals = goals.filter(g => !g.archived).length > 0;
+    if (visited && hasGoals) {
+      // Returning user with goals — show briefly with welcome back message
+      document.getElementById('returning-msg').style.display = 'block';
+      document.getElementById('landing').style.display = 'flex';
+    } else if (visited && !hasGoals) {
+      // Visited before but no goals — skip landing
+      dismissLanding(true);
+    } else {
+      // First time — show full landing
+      document.getElementById('landing').style.display = 'flex';
+    }
+    // Sync landing theme toggle with main toggle
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.getElementById('landing-theme-track').classList.toggle('on', isDark);
+  }
+
+
+  // ── SUPABASE ──────────────────────────────────────────────────────────────
+  let sb = null;
+  let currentUser = null;
+  let authMode = 'signin';
+
+  function getSbConfig() {
+    return {
+      url: localStorage.getItem('sb-url') || '',
+      key: localStorage.getItem('sb-key') || ''
+    };
+  }
+
+  function initSupabase() {
+    try {
+      sb = window.supabase.createClient('https://bfswkvyyijuumhppiees.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmc3drdnl5aWp1dW1ocHBpZWVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4ODI0MjAsImV4cCI6MjA4OTQ1ODQyMH0.bZnjcmzuBnMpHKYF5KlaVSs8GZFbJBQmdLi98wchOhs');
+      return true;
+    } catch(e) {
+      console.error('Supabase init failed:', e);
+      return false;
+    }
+  }
+
+  // connectSupabase removed — credentials are hardcoded
+
+  function showAuthScreen() {
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+  function hideAuthScreen() {
+    document.getElementById('auth-screen').style.display = 'none';
+  }
+
+  function toggleAuthMode() {
+    authMode = authMode === 'signin' ? 'signup' : 'signin';
+    document.getElementById('auth-btn').textContent    = authMode === 'signin' ? 'Sign in' : 'Create account';
+    document.getElementById('auth-subtitle').textContent = authMode === 'signin'
+      ? 'Sign in to sync your goals across all your devices.'
+      : 'Create a free account to get started.';
+    document.getElementById('auth-switch-text').textContent = authMode === 'signin'
+      ? "Don't have an account?" : 'Already have an account?';
+    document.querySelector('#auth-screen .auth-switch button').textContent = authMode === 'signin' ? 'Sign up' : 'Sign in';
+    document.getElementById('auth-error').style.display = 'none';
+    document.getElementById('auth-success').style.display = 'none';
+  }
+
+  function showAuthError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('auth-success').style.display = 'none';
+  }
+  function showAuthSuccess(msg) {
+    const el = document.getElementById('auth-success');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('auth-error').style.display = 'none';
+  }
+
+  async function handleAuth() {
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const btn = document.getElementById('auth-btn');
+    if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
+    btn.disabled = true; btn.textContent = authMode === 'signin' ? 'Signing in…' : 'Creating account…';
+    document.getElementById('auth-error').style.display = 'none';
+    try {
+      let result;
+      if (authMode === 'signup') {
+        result = await sb.auth.signUp({ email, password });
+        if (result.error) throw result.error;
+        if (result.data.user && !result.data.session) {
+          showAuthSuccess('Check your email to confirm your account, then sign in.');
+          btn.disabled = false; btn.textContent = 'Create account'; return;
+        }
+      } else {
+        result = await sb.auth.signInWithPassword({ email, password });
+        if (result.error) throw result.error;
+      }
+      currentUser = result.data.user;
+      await onSignedIn();
+    } catch(e) {
+      showAuthError(e.message || 'Something went wrong. Please try again.');
+      btn.disabled = false;
+      btn.textContent = authMode === 'signin' ? 'Sign in' : 'Create account';
+    }
+  }
+
+  async function onSignedIn() {
+    hideAuthScreen();
+    dismissLanding(true);
+    const email = currentUser.email;
+    document.getElementById('user-email').textContent = email;
+    document.getElementById('user-bar').style.display = 'flex';
+    setSyncStatus('syncing', 'Syncing…');
+    await loadFromSupabase();
+    setSyncStatus('synced', 'Synced');
+    localStorage.setItem('focus-visited', '1');
+  }
+
+  async function signOut() {
+    if (!sb) return;
+    await sb.auth.signOut();
+    currentUser = null;
+    document.getElementById('user-bar').style.display = 'none';
+    showAuthScreen();
+  }
+
+  function setSyncStatus(state, label) {
+    const dot = document.getElementById('sync-dot');
+    const lbl = document.getElementById('sync-label');
+    dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'error' ? ' error' : '');
+    if (lbl) lbl.textContent = label;
+  }
+
+  // ── SUPABASE DATA SYNC ────────────────────────────────────────────────────
+  async function loadFromSupabase() {
+    if (!sb || !currentUser) return;
+    try {
+      const [goalsRes, tasksRes, actRes] = await Promise.all([
+        sb.from('goals').select('*').eq('user_id', currentUser.id).order('sort_order'),
+        sb.from('tasks').select('*').eq('user_id', currentUser.id),
+        sb.from('activity_log').select('*').eq('user_id', currentUser.id)
+      ]);
+      if (goalsRes.error) throw goalsRes.error;
+
+      // Rebuild goals array with tasks nested
+      const tasksMap = {};
+      (tasksRes.data || []).forEach(t => {
+        if (!tasksMap[t.goal_id]) tasksMap[t.goal_id] = [];
+        tasksMap[t.goal_id].push({
+          id: t.id, label: t.label, done: t.done,
+          subtasks: t.subtasks || [],
+          recur: t.recur || undefined,
+          due: t.due || undefined
+        });
+      });
+
+      goals = (goalsRes.data || []).map(g => ({
+        id: g.id, title: g.title, cat: g.cat, priority: g.priority,
+        due: g.due, notes: g.notes, archived: g.archived,
+        archivedAt: g.archived_at,
+        tasks: tasksMap[g.id] || []
+      }));
+
+      activityLog = (actRes.data || []).map(a => ({ date: a.date, count: a.count }));
+
+      save(); saveLog();
+      render(); renderFocus(); updateStreak(); renderChart(); renderArchived(); buildProactiveNotices();
+    } catch(e) {
+      console.error('Load error:', e);
+      setSyncStatus('error', 'Sync error');
+    }
+  }
+
+  async function syncGoalToSupabase(g) {
+    if (!sb || !currentUser) return;
+    setSyncStatus('syncing', 'Saving…');
+    try {
+      const sortOrder = goals.findIndex(x => x.id === g.id);
+      await sb.from('goals').upsert({
+        id: g.id, user_id: currentUser.id,
+        title: g.title, cat: g.cat || 'other',
+        priority: g.priority || 'medium', due: g.due || '',
+        notes: g.notes || '', archived: g.archived || false,
+        archived_at: g.archivedAt || '', sort_order: sortOrder
+      });
+      setSyncStatus('synced', 'Synced');
+    } catch(e) { setSyncStatus('error', 'Sync error'); }
+  }
+
+  async function syncTaskToSupabase(goalId, t) {
+    if (!sb || !currentUser) return;
+    try {
+      await sb.from('tasks').upsert({
+        id: t.id, goal_id: goalId, user_id: currentUser.id,
+        label: t.label, done: t.done,
+        subtasks: t.subtasks || [],
+        recur: t.recur || null,
+        due: t.due || null
+      });
+    } catch(e) { console.error('Task sync error:', e); }
+  }
+
+  async function deleteGoalFromSupabase(id) {
+    if (!sb || !currentUser) return;
+    try { await sb.from('goals').delete().eq('id', id); } catch(e) {}
+  }
+
+  async function deleteTaskFromSupabase(taskId) {
+    if (!sb || !currentUser) return;
+    try { await sb.from('tasks').delete().eq('id', taskId); } catch(e) {}
+  }
+
+  async function syncActivityToSupabase() {
+    if (!sb || !currentUser) return;
+    const today = todayStr();
+    const entry = activityLog.find(e => e.date === today);
+    if (!entry) return;
+    try {
+      await sb.from('activity_log').upsert({
+        user_id: currentUser.id, date: today, count: entry.count
+      }, { onConflict: 'user_id,date' });
+    } catch(e) {}
+  }
+
+  async function checkSession() {
+    if (!sb) return;
+    const { data } = await sb.auth.getSession();
+    if (data?.session?.user) {
+      currentUser = data.session.user;
+      await onSignedIn();
+    } else {
+      showAuthScreen();
+    }
+  }
+
+  // ── INIT ──
+  initTheme();
+  updateKeyStatus();
+  render();
+  if (initSupabase()) { checkSession(); } else { initLanding(); }
+  renderFocus();
+  updateStreak();
+  renderChart();
+  renderArchived();
+  buildProactiveNotices();
+  resetRecurringTasks();
+</script>
+
+</body>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(r => console.log('SW registered'))
+          .catch(e => console.log('SW failed:', e));
+      });
+    }
+  </script>
+</body>
+</html>
