@@ -891,7 +891,7 @@
     #landing {
       position: fixed; inset: 0; z-index: 999;
       background: var(--bg);
-      display: flex; align-items: flex-start; justify-content: center;
+      align-items: flex-start; justify-content: center;
       padding: env(safe-area-inset-top, 24px) 24px env(safe-area-inset-bottom, 24px);
       overflow-y: auto;
       transition: opacity 0.5s ease, transform 0.5s ease;
@@ -1450,7 +1450,7 @@
 <div id="toast-container"></div>
 
 
-<div id="landing">
+<div id="landing" style="display:none">
   <div class="landing-theme-row">
     <span class="theme-toggle-label">Light</span>
     <div class="toggle-track" id="landing-theme-track" onclick="toggleTheme();document.getElementById('theme-track').classList.toggle('on',document.documentElement.getAttribute('data-theme')==='dark');document.getElementById('landing-theme-track').classList.toggle('on',document.documentElement.getAttribute('data-theme')==='dark')">
@@ -1497,10 +1497,10 @@
       </div>
     </div>
 
-    <button class="btn-get-started" onclick="dismissLanding(false)">Get started →</button>
+    <button class="btn-get-started" onclick="getStarted()">Get started →</button>
     <br>
     <div class="landing-returning" id="returning-msg" style="display:none">
-      <button onclick="dismissLanding(false)">Welcome back — go to my goals</button>
+      <button onclick="getStarted()">Welcome back — go to my goals</button>
     </div>
 
   </div>
@@ -3390,32 +3390,36 @@ Please give me a motivating Monday check-in:
 
 
   // ── LANDING ──
+  function showLanding() {
+    const el = document.getElementById('landing');
+    el.style.display = 'flex';
+    el.classList.remove('hidden');
+    // Sync theme toggle
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const track = document.getElementById('landing-theme-track');
+    if (track) track.classList.toggle('on', isDark);
+  }
   function dismissLanding(instant) {
     const el = document.getElementById('landing');
+    el.classList.remove('hidden');
     if (instant) { el.style.display = 'none'; return; }
     el.classList.add('hidden');
     setTimeout(() => { el.style.display = 'none'; }, 500);
-    localStorage.setItem('focus-visited', '1');
-    // Show auth screen if Supabase is configured but no one is signed in
-    if (sb && !currentUser) showAuthScreen();
   }
   function initLanding() {
     const visited = localStorage.getItem('focus-visited');
-    const hasGoals = goals.filter(g => !g.archived).length > 0;
-    if (visited && hasGoals) {
-      // Returning user with goals — show briefly with welcome back message
+    if (visited) {
       document.getElementById('returning-msg').style.display = 'block';
-      document.getElementById('landing').style.display = 'flex';
-    } else if (visited && !hasGoals) {
-      // Visited before but no goals — skip landing
-      dismissLanding(true);
-    } else {
-      // First time — show full landing
-      document.getElementById('landing').style.display = 'flex';
     }
-    // Sync landing theme toggle with main toggle
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.getElementById('landing-theme-track').classList.toggle('on', isDark);
+    showLanding();
+  }
+  function getStarted() {
+    dismissLanding(false);
+    localStorage.setItem('focus-visited', '1');
+    // Show auth screen after animation
+    setTimeout(() => {
+      if (sb && !currentUser) showAuthScreen();
+    }, 520);
   }
 
 
@@ -3628,22 +3632,27 @@ Please give me a motivating Monday check-in:
 
   async function checkSession() {
     if (!sb) return;
-    const { data } = await sb.auth.getSession();
-    if (data?.session?.user) {
-      currentUser = data.session.user;
-      dismissLanding(true); // already signed in — skip landing entirely
-      await onSignedIn();
+    try {
+      const { data } = await sb.auth.getSession();
+      if (data?.session?.user) {
+        currentUser = data.session.user;
+        dismissLanding(true);
+        await onSignedIn();
+      }
+      // No session — landing is already showing, user taps Get Started
+    } catch(e) {
+      console.error('Session check failed:', e);
+      // On error, landing is already showing so user can still tap Get Started
     }
-    // If no session, landing stays visible — user clicks Get Started → auth screen
   }
 
   // ── INIT ──
   initTheme();
   updateKeyStatus();
   render();
-  // Always show landing first, then check if already signed in
   initLanding();
-  if (initSupabase()) { checkSession(); }
+  initSupabase();
+  checkSession();
   renderFocus();
   updateStreak();
   renderChart();
