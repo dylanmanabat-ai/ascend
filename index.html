@@ -3394,8 +3394,10 @@ Please give me a motivating Monday check-in:
     const el = document.getElementById('landing');
     if (instant) { el.style.display = 'none'; return; }
     el.classList.add('hidden');
-    setTimeout(() => el.style.display = 'none', 500);
+    setTimeout(() => { el.style.display = 'none'; }, 500);
     localStorage.setItem('focus-visited', '1');
+    // Show auth screen if Supabase is configured but no one is signed in
+    if (sb && !currentUser) showAuthScreen();
   }
   function initLanding() {
     const visited = localStorage.getItem('focus-visited');
@@ -3629,17 +3631,19 @@ Please give me a motivating Monday check-in:
     const { data } = await sb.auth.getSession();
     if (data?.session?.user) {
       currentUser = data.session.user;
+      dismissLanding(true); // already signed in — skip landing entirely
       await onSignedIn();
-    } else {
-      showAuthScreen();
     }
+    // If no session, landing stays visible — user clicks Get Started → auth screen
   }
 
   // ── INIT ──
   initTheme();
   updateKeyStatus();
   render();
-  if (initSupabase()) { checkSession(); } else { initLanding(); }
+  // Always show landing first, then check if already signed in
+  initLanding();
+  if (initSupabase()) { checkSession(); }
   renderFocus();
   updateStreak();
   renderChart();
