@@ -1070,10 +1070,124 @@
       .sort-row { flex-wrap: wrap; }
     }
 
+
+    /* ── MOBILE TOUCH ── */
+    @media (hover: none) and (pointer: coarse) {
+      .btn-delete-task { color: var(--ink-muted) !important; }
+      .btn-pin { color: var(--ink-muted) !important; }
+      .btn-recur { color: var(--ink-muted) !important; }
+      .btn-subtasks { color: var(--ink-muted) !important; }
+      .drag-handle { display: none; }
+      .btn-unpin { color: var(--ink-muted) !important; }
+      .btn-del-subtask { color: var(--ink-muted) !important; }
+      .task-check { width: 24px; height: 24px; }
+      .subtask-check { width: 20px; height: 20px; }
+      .btn-icon { padding: 8px; }
+      .btn-delete-task { padding: 6px 8px; }
+      .btn-pin, .btn-recur, .btn-subtasks { padding: 6px 8px; font-size: 1rem; }
+      .task-item { padding: 12px 11px; min-height: 48px; }
+      .subtask-item { padding: 10px; min-height: 44px; }
+      .btn-primary { padding: 12px 20px; }
+      .filter-select { padding: 10px 14px; font-size: 0.9rem; }
+    }
+
+    /* ── DARK MODE LANDING ── */
+    [data-theme="dark"] #landing { background: var(--bg); }
+    [data-theme="dark"] .landing-feature { background: var(--surface); border-color: var(--border); }
+    [data-theme="dark"] .landing-feature .feat-title { color: var(--ink); }
+    [data-theme="dark"] .landing-feature .feat-desc { color: var(--ink-muted); }
+    [data-theme="dark"] .landing-tagline { color: var(--ink-muted); }
+    [data-theme="dark"] .landing-returning button { color: var(--accent); }
+
+
+    /* ── ACCOUNT MANAGEMENT ── */
+    .btn-danger {
+      background: none; border: 1px solid #F5C0C0;
+      border-radius: 8px; padding: 8px 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: #A33030; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-danger:hover { background: #FDE8E8; }
+    [data-theme="dark"] .btn-danger { border-color: #4A2A2A; color: #C96060; }
+    [data-theme="dark"] .btn-danger:hover { background: #2E1A1A; }
+    #account-panel {
+      display: none; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px;
+      max-width: 680px; margin: 16px auto 0;
+    }
+    .account-panel-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.1rem; font-weight: 400; margin-bottom: 16px; color: var(--ink);
+    }
+    .account-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--border); gap: 16px; flex-wrap: wrap;
+    }
+    .account-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .account-row-label { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
+    .account-row-sub { font-size: 0.78rem; color: var(--ink-muted); margin-top: 2px; }
+
+    /* ── TOAST ── */
+    #toast-container {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 9998; display: flex; flex-direction: column; gap: 8px;
+      align-items: center; pointer-events: none;
+    }
+    .toast {
+      background: var(--ink); color: var(--bg);
+      border-radius: 99px; padding: 10px 20px;
+      font-size: 0.88rem; font-weight: 500;
+      animation: toastIn 0.3s ease forwards;
+      pointer-events: none; white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .toast.success { background: #4A7A44; color: #fff; }
+    .toast.milestone { background: var(--accent); color: #fff; font-size: 0.95rem; padding: 12px 24px; }
+    @keyframes toastIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes toastOut { from { opacity:1; } to { opacity:0; transform:translateY(10px); } }
+
+    /* ── MEDAL BADGE ── */
+    .medal-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.7rem; font-weight: 500; padding: 2px 8px;
+      border-radius: 99px; margin-left: 8px; vertical-align: middle;
+      background: #FAEEDA; color: #633806; border: 1px solid #EF9F27;
+      animation: badgePop 0.4s cubic-bezier(.36,.07,.19,.97);
+    }
+    [data-theme="dark"] .medal-badge { background: #2E2218; color: #FAC775; border-color: #854F0B; }
+
+    /* ── PROGRESS HISTORY ── */
+    .history-section { border-top: 1px solid var(--border); padding: 12px 18px; }
+    .history-toggle {
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: var(--ink-muted); padding: 0; display: flex;
+      align-items: center; gap: 6px; transition: color 0.15s; width: 100%;
+    }
+    .history-toggle:hover { color: var(--accent); }
+    .history-wrap { margin-top: 12px; display: none; }
+    .history-wrap.open { display: block; }
+    .sparkline-wrap { display: flex; align-items: flex-end; gap: 3px; height: 40px; margin-bottom: 6px; }
+    .sparkline-bar {
+      flex: 1; border-radius: 3px 3px 0 0;
+      background: var(--accent); opacity: 0.7; min-height: 2px;
+    }
+    .sparkline-bar.current { opacity: 1; }
+    .sparkline-bar.zero { background: var(--border); opacity: 1; }
+    .history-label { font-size: 0.72rem; color: var(--ink-muted); margin-bottom: 8px; }
+    .history-entries {
+      display: flex; flex-direction: column; gap: 4px;
+      max-height: 120px; overflow-y: auto; margin-top: 8px;
+    }
+    .history-entry { display: flex; justify-content: space-between; font-size: 0.76rem; }
+    .history-entry-date { color: var(--ink-muted); }
+    .history-entry-pct { font-weight: 500; color: var(--ink); }
+
   </style>
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
+<div id="toast-container"></div>
 
 <div id="landing">
   <div class="landing-theme-row">
@@ -1152,6 +1266,9 @@
       <span id="auth-switch-text">Don't have an account?</span>
       <button onclick="toggleAuthMode()">Sign up</button>
     </div>
+    <div style="text-align:center;margin-top:12px" id="forgot-wrap">
+      <button onclick="forgotPassword()" style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:0.8rem;font-family:'DM Sans',sans-serif;text-decoration:underline">Forgot password?</button>
+    </div>
   </div>
 </div>
 
@@ -1165,6 +1282,7 @@
       <div class="user-bar" id="user-bar" style="display:none">
         <span class="user-email" id="user-email"></span>
         <div class="sync-indicator"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Synced</span></div>
+        <button class="btn-signout" onclick="toggleAccountPanel()">⚙ Account</button>
         <button class="btn-signout" onclick="signOut()">Sign out</button>
       </div>
       <div class="theme-toggle">
@@ -1183,6 +1301,13 @@
   <input type="text" id="sb-url" placeholder="https://xxxx.supabase.co"/>
   <input type="text" id="sb-key" placeholder="anon key (eyJ…)"/>
   <button class="btn-connect" onclick="connectSupabase()">Connect</button>
+</div>
+
+<div id="account-panel">
+  <div class="account-panel-title">Account settings</div>
+  <div class="account-row"><div><div class="account-row-label">Email</div><div class="account-row-sub" id="account-email-display">—</div></div></div>
+  <div class="account-row"><div><div class="account-row-label">Change password</div><div class="account-row-sub">Send a password reset link to your email</div></div><button class="btn-restore" onclick="sendPasswordReset(event)">Send reset email</button></div>
+  <div class="account-row"><div><div class="account-row-label" style="color:#A33030">Delete account</div><div class="account-row-sub">Permanently delete your account and all data.</div></div><button class="btn-danger" onclick="deleteAccount()">Delete</button></div>
 </div>
 
 <div class="stats-bar">
@@ -1439,6 +1564,7 @@
   function updateStreak() {
     const s = calcStreak();
     document.getElementById('streak-badge').innerHTML = `🔥 <span id="streak-count">${s}</span> day streak`;
+    checkStreakMilestones(s);
   }
 
   // ── CHART ──
@@ -1560,12 +1686,14 @@
     const wasComplete = pct(g) === 100;
     save(); renderGoal(g); updateStats(); updateStreak(); renderChart();
     syncTaskToSupabase(goalId, t);
+    logGoalProgress(goalId);
     // Check if goal just became complete
     if (!wasComplete && pct(g) === 100 && g.tasks.length) {
       setTimeout(() => {
         const card = document.getElementById('card-' + goalId);
         if (card) card.classList.add('just-completed');
         launchConfetti();
+        awardMedal(goalId);
       }, 200);
     }
   }
@@ -1650,7 +1778,7 @@
             onblur="saveGoalTitle('${g.id}',this.value)"
             onkeydown="if(event.key==='Enter'){this.blur()}"
             title="Click to edit"/>
-          ${complete ? '<span class="goal-badge">✓ Complete</span>' : ''}
+          ${complete ? `<span class="goal-badge">✓ Complete</span>${g.completedAt ? '<span class="medal-badge">🏅 '+g.completedAt+'</span>' : ''}` : ''}
           <div class="progress-wrap">
             <div class="progress-bar"><div class="progress-fill${complete?' complete':''}" style="width:${p}%"></div></div>
             <span class="progress-pct">${p}%</span>
@@ -1718,7 +1846,15 @@
           <textarea class="notes-area" placeholder="Jot down ideas, context, or progress thoughts…"
             oninput="saveNote('${g.id}', this.value)">${escHtml(g.notes||'')}</textarea>
         </div>
-      </div>`;
+      </div>
+      <div class="history-section">
+        <button class="history-toggle" onclick="toggleHistory('${g.id}')">📊 Progress history</button>
+        <div class="history-wrap" id="history-wrap-${g.id}">
+          <div class="sparkline-wrap" id="sparkline-${g.id}"></div>
+          <div class="history-label" id="history-label-${g.id}"></div>
+          <div class="history-entries" id="history-entries-${g.id}"></div>
+        </div>
+      </div>\`;
     // Drag events
     card.addEventListener('dragstart', e => { dragSrcId = g.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
     card.addEventListener('dragend',   () => { card.classList.remove('dragging'); document.querySelectorAll('.goal-card').forEach(c=>c.classList.remove('drag-over')); });
@@ -2338,6 +2474,122 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
     draw();
   }
 
+
+  // ── TOAST ──
+  function showToast(msg, type='', duration=3500) {
+    const c = document.getElementById('toast-container');
+    if (!c) return;
+    const t = document.createElement('div');
+    t.className = 'toast' + (type ? ' '+type : '');
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => {
+      t.style.animation = 'toastOut 0.3s ease forwards';
+      setTimeout(() => t.remove(), 300);
+    }, duration);
+  }
+
+  // ── STREAK MILESTONES ──
+  const STREAK_MILESTONES = [7,14,30,60,100,365];
+  function checkStreakMilestones(streak) {
+    const done = JSON.parse(localStorage.getItem('streak-milestones') || '[]');
+    if (!STREAK_MILESTONES.includes(streak) || done.includes(streak)) return;
+    done.push(streak); localStorage.setItem('streak-milestones', JSON.stringify(done));
+    launchConfetti();
+    const msgs = {
+      7:'🔥 7 day streak! One week of consistency.',
+      14:'🔥 14 days! Two weeks strong.',
+      30:'🏆 30 day streak! One whole month.',
+      60:'🏆 60 days! Two months of consistency.',
+      100:'🎖 100 day streak! Triple digits.',
+      365:'🌟 365 days! One full year of Ascend.'
+    };
+    setTimeout(() => showToast(msgs[streak]||'🔥 Streak milestone!','milestone',5000), 400);
+  }
+
+  // ── MEDAL ──
+  function awardMedal(goalId) {
+    const g = goals.find(g => g.id === goalId); if (!g || g.completedAt) return;
+    g.completedAt = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    save(); renderGoal(g); syncGoalToSupabase(g);
+    setTimeout(() => showToast('🏅 Medal earned: "'+g.title+'"','milestone',4000), 600);
+  }
+
+  // ── PROGRESS HISTORY ──
+  function toggleHistory(goalId) {
+    const wrap = document.getElementById('history-wrap-'+goalId);
+    if (!wrap) return;
+    if (wrap.classList.toggle('open')) renderHistory(goalId);
+  }
+  function logGoalProgress(goalId) {
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    const key = 'goal-history-'+goalId;
+    const history = JSON.parse(localStorage.getItem(key)||'[]');
+    const today = todayStr(); const p = pct(g);
+    const last = history[history.length-1];
+    if (last && last.date === today) last.pct = p;
+    else history.push({date:today,pct:p});
+    localStorage.setItem(key, JSON.stringify(history.slice(-30)));
+  }
+  function renderHistory(goalId) {
+    const history = JSON.parse(localStorage.getItem('goal-history-'+goalId)||'[]');
+    const sparkline = document.getElementById('sparkline-'+goalId);
+    const label = document.getElementById('history-label-'+goalId);
+    const entries = document.getElementById('history-entries-'+goalId);
+    if (!sparkline) return;
+    if (!history.length) {
+      label.textContent = 'No history yet — progress tracked from today.';
+      sparkline.innerHTML = ''; entries.innerHTML = ''; return;
+    }
+    const max = Math.max(...history.map(h=>h.pct),1);
+    sparkline.innerHTML = history.map((h,i) => {
+      const ht = h.pct===0 ? 2 : Math.max((h.pct/max)*100,4);
+      return `<div class="sparkline-bar${h.pct===0?' zero':''}${i===history.length-1?' current':''}" style="height:${ht}%" title="${h.date}: ${h.pct}%"></div>`;
+    }).join('');
+    label.textContent = `${history.length} day${history.length!==1?'s':''} — ${history[0].pct}% to ${history[history.length-1].pct}%`;
+    entries.innerHTML = [...history].reverse().map(h=>`<div class="history-entry"><span class="history-entry-date">${h.date}</span><span class="history-entry-pct">${h.pct}%</span></div>`).join('');
+  }
+
+  // ── ACCOUNT ──
+  function toggleAccountPanel() {
+    const p = document.getElementById('account-panel');
+    const isOpen = p.style.display === 'block';
+    p.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen && currentUser) {
+      document.getElementById('account-email-display').textContent = currentUser.email;
+      p.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+  }
+  async function sendPasswordReset(e) {
+    if (!sb||!currentUser) return;
+    const btn = e.target; btn.disabled=true; btn.textContent='Sending…';
+    try {
+      const {error} = await sb.auth.resetPasswordForEmail(currentUser.email,{
+        redirectTo:'https://dylanmanabat-ai.github.io/ascend/'
+      });
+      if (error) throw error;
+      btn.textContent='✓ Email sent';
+      setTimeout(()=>{btn.disabled=false;btn.textContent='Send reset email';},4000);
+    } catch(e) { btn.textContent='Failed'; btn.disabled=false; }
+  }
+  async function deleteAccount() {
+    if (!sb||!currentUser) return;
+    if (!confirm('Delete your account and ALL your goals permanently? This cannot be undone.')) return;
+    if (!confirm('Last chance — are you absolutely sure?')) return;
+    try {
+      await sb.from('goals').delete().eq('user_id',currentUser.id);
+      await sb.from('activity_log').delete().eq('user_id',currentUser.id);
+      await sb.auth.signOut();
+      localStorage.clear(); location.reload();
+    } catch(e) { alert('Something went wrong. Please try again.'); }
+  }
+  function forgotPassword() {
+    const email = document.getElementById('auth-email').value.trim();
+    if (!email) { showAuthError('Enter your email above first.'); return; }
+    sb.auth.resetPasswordForEmail(email,{redirectTo:'https://dylanmanabat-ai.github.io/ascend/'})
+      .then(({error}) => error ? showAuthError(error.message) : showAuthSuccess('Reset email sent — check your inbox.'));
+  }
+
   // ── THEME ──
   function toggleTheme() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -2518,7 +2770,7 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
       goals = (goalsRes.data || []).map(g => ({
         id: g.id, title: g.title, cat: g.cat, priority: g.priority,
         due: g.due, notes: g.notes, archived: g.archived,
-        archivedAt: g.archived_at,
+        archivedAt: g.archived_at, completedAt: g.completed_at || '',
         tasks: tasksMap[g.id] || []
       }));
 
@@ -2542,7 +2794,8 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
         title: g.title, cat: g.cat || 'other',
         priority: g.priority || 'medium', due: g.due || '',
         notes: g.notes || '', archived: g.archived || false,
-        archived_at: g.archivedAt || '', sort_order: sortOrder
+        archived_at: g.archivedAt || '', sort_order: sortOrder,
+        completed_at: g.completedAt || ''
       });
       setSyncStatus('synced', 'Synced');
     } catch(e) { setSyncStatus('error', 'Sync error'); }
