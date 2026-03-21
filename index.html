@@ -2612,6 +2612,8 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
     el.classList.add('hidden');
     setTimeout(() => el.style.display = 'none', 500);
     localStorage.setItem('focus-visited', '1');
+    // Show auth screen after landing dismisses
+    if (sb && !currentUser) setTimeout(() => showAuthScreen(), 520);
   }
   function initLanding() {
     const visited = localStorage.getItem('focus-visited');
@@ -2838,12 +2840,17 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
 
   async function checkSession() {
     if (!sb) return;
-    const { data } = await sb.auth.getSession();
-    if (data?.session?.user) {
-      currentUser = data.session.user;
-      await onSignedIn();
-    } else {
-      showAuthScreen();
+    try {
+      const { data } = await sb.auth.getSession();
+      if (data?.session?.user) {
+        currentUser = data.session.user;
+        dismissLanding(true); // skip landing — already signed in
+        await onSignedIn();
+      }
+      // No session — landing is already showing, user taps Get Started → auth screen
+    } catch(e) {
+      console.error('Session check error:', e);
+      // Landing already showing so user can still proceed
     }
   }
 
@@ -2851,7 +2858,8 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
   initTheme();
   updateKeyStatus();
   render();
-  if (initSupabase()) { checkSession(); } else { initLanding(); }
+  initLanding();
+  if (initSupabase()) checkSession();
   renderFocus();
   updateStreak();
   renderChart();
