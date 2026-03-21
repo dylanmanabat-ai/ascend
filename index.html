@@ -734,6 +734,46 @@
     }
     .btn-notice-action:hover { border-color: #E08A5A; color: #E08A5A; }
 
+
+    /* ── MONDAY CHECK-IN ── */
+    .monday-banner {
+      background: var(--ai-surface); border: 1px solid var(--ai-border);
+      border-radius: var(--r); padding: 16px 18px; margin-bottom: 20px;
+      display: none;
+    }
+    .monday-banner.visible { display: block; }
+    .monday-banner-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 10px;
+    }
+    .monday-banner-title { font-size: 0.9rem; font-weight: 500; color: #D8D4CE; }
+    .monday-banner-sub { font-size: 0.8rem; color: var(--ai-muted); margin-top: 2px; }
+    .btn-monday {
+      background: #E08A5A; color: #fff; border: none;
+      border-radius: 8px; padding: 8px 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500;
+      cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+    }
+    .btn-monday:hover { opacity: 0.85; }
+    .btn-dismiss-monday {
+      background: none; border: none; cursor: pointer;
+      color: var(--ai-muted); font-size: 0.8rem; padding: 0;
+      font-family: 'DM Sans', sans-serif; text-decoration: underline;
+      margin-top: 8px; display: block;
+    }
+    .btn-dismiss-monday:hover { color: #B0ADA8; }
+
+    /* ── CATEGORY SUGGESTIONS ── */
+    .cat-suggestions {
+      margin-bottom: 20px; display: none;
+    }
+    .cat-suggestions.visible { display: block; }
+    .cat-suggestions-title {
+      font-size: 0.78rem; color: var(--ai-muted);
+      margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .cat-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
     .ai-disclaimer { margin-top: 16px; font-size: 0.75rem; color: var(--ai-muted); line-height: 1.5; }
     .ai-disclaimer a { color: #E08A5A; text-decoration: none; }
     .ai-disclaimer a:hover { text-decoration: underline; }
@@ -1070,10 +1110,345 @@
       .sort-row { flex-wrap: wrap; }
     }
 
+
+    /* ── ACCOUNT MANAGEMENT ── */
+    .auth-danger-zone {
+      margin-top: 24px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .auth-danger-zone p {
+      font-size: 0.78rem; color: var(--ink-muted);
+      margin-bottom: 10px; line-height: 1.5;
+    }
+    .btn-danger {
+      background: none; border: 1px solid #F5C0C0;
+      border-radius: 8px; padding: 8px 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: #A33030; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-danger:hover { background: #FDE8E8; }
+    [data-theme="dark"] .btn-danger { border-color: #4A2A2A; color: #C96060; }
+    [data-theme="dark"] .btn-danger:hover { background: #2E1A1A; }
+
+    /* Account settings panel */
+    #account-panel {
+      display: none; margin-top: 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px;
+      max-width: 680px; margin: 16px auto 0;
+    }
+    .account-panel-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.1rem; font-weight: 400; margin-bottom: 16px; color: var(--ink);
+    }
+    .account-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--border); gap: 16px;
+      flex-wrap: wrap;
+    }
+    .account-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .account-row-info { flex: 1; }
+    .account-row-label { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
+    .account-row-sub { font-size: 0.78rem; color: var(--ink-muted); margin-top: 2px; }
+
+    /* ── MOBILE TOUCH IMPROVEMENTS ── */
+    @media (hover: none) and (pointer: coarse) {
+      /* Always show action buttons on touch devices */
+      .btn-delete-task { color: var(--ink-muted) !important; }
+      .btn-pin { color: var(--ink-muted) !important; }
+      .btn-recur { color: var(--ink-muted) !important; }
+      .btn-subtasks { color: var(--ink-muted) !important; }
+      .drag-handle { color: var(--ink-muted) !important; }
+      .btn-unpin { color: var(--ink-muted) !important; }
+      .btn-del-subtask { color: var(--ink-muted) !important; }
+      .notes-toggle { color: var(--ink-muted) !important; }
+
+      /* Larger tap targets */
+      .task-check { width: 24px; height: 24px; }
+      .subtask-check { width: 20px; height: 20px; }
+      .btn-icon { padding: 8px; }
+      .btn-delete-task { padding: 6px 8px; }
+      .btn-pin, .btn-recur, .btn-subtasks { padding: 6px 8px; font-size: 1rem; }
+      .filter-select { padding: 10px 14px; font-size: 0.9rem; }
+      .cat-select { padding: 12px 14px; }
+      .btn-primary { padding: 12px 20px; }
+      .btn-add-task { padding: 10px 16px; }
+      .add-task-row input { padding: 10px 14px; }
+
+      /* Disable drag on touch — use long press instead */
+      .goal-card { cursor: default; }
+      .drag-handle { display: none; }
+
+      /* Bigger task items for easier tapping */
+      .task-item { padding: 12px 11px; min-height: 48px; }
+      .subtask-item { padding: 10px; min-height: 44px; }
+    }
+
+
+    /* ── NOTIFICATIONS ── */
+    .notif-section {
+      max-width: 680px; margin: 0 auto 24px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 18px 20px;
+      display: none;
+    }
+    .notif-section.visible { display: block; }
+    .notif-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .notif-title { font-family: 'Instrument Serif', serif; font-size: 1rem; font-weight: 400; }
+    .notif-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .notif-row p { font-size: 0.84rem; color: var(--ink-muted); flex: 1; min-width: 200px; line-height: 1.5; }
+    .btn-notif {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: 8px 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500;
+      cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+    }
+    .btn-notif:hover { opacity: 0.88; }
+    .btn-notif.granted { background: var(--done-ink); }
+    .notif-time-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .notif-time-row label { font-size: 0.82rem; color: var(--ink-muted); }
+    .notif-time-input {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 7px; padding: 6px 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--ink);
+      outline: none; transition: border-color 0.2s;
+    }
+    .notif-time-input:focus { border-color: var(--accent); }
+
+    /* ── PROGRESS PHOTOS ── */
+    .photos-section {
+      border-top: 1px solid var(--border); padding: 12px 18px;
+    }
+    .photos-toggle {
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: var(--ink-muted); padding: 0; display: flex;
+      align-items: center; gap: 6px; transition: color 0.15s; width: 100%;
+    }
+    .photos-toggle:hover { color: var(--accent); }
+    .photos-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px; margin-top: 12px;
+    }
+    .photo-thumb {
+      width: 100%; aspect-ratio: 1; object-fit: cover;
+      border-radius: 8px; cursor: pointer;
+      border: 1px solid var(--border); transition: opacity 0.15s;
+    }
+    .photo-thumb:hover { opacity: 0.85; }
+    .photo-add {
+      width: 100%; aspect-ratio: 1;
+      border: 2px dashed var(--border); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.4rem; color: var(--ink-muted);
+      transition: border-color 0.15s, color 0.15s; background: var(--bg);
+    }
+    .photo-add:hover { border-color: var(--accent); color: var(--accent); }
+    .photo-input { display: none; }
+    .photo-uploading { font-size: 0.76rem; color: var(--ink-muted); margin-top: 6px; }
+
+    /* ── DARK MODE LANDING ── */
+    [data-theme="dark"] #landing { background: var(--bg); }
+    [data-theme="dark"] .landing-feature {
+      background: var(--surface); border-color: var(--border);
+    }
+    [data-theme="dark"] .landing-feature .feat-title { color: var(--ink); }
+    [data-theme="dark"] .landing-feature .feat-desc { color: var(--ink-muted); }
+    [data-theme="dark"] .landing-returning button { color: var(--accent); }
+    [data-theme="dark"] .btn-get-started { background: var(--accent); }
+
+    /* ── GOAL SHARING ── */
+    .share-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.7rem; font-weight: 500; padding: 2px 8px;
+      border-radius: 99px; background: #E8EEF8; color: #2E4E8A;
+      border: 1px solid #C0CFF0; cursor: pointer; transition: all 0.15s;
+    }
+    .share-badge:hover { background: #C0CFF0; }
+    [data-theme="dark"] .share-badge { background: #1A1E2E; color: #5A80C8; border-color: #2A304A; }
+    .share-modal {
+      position: fixed; inset: 0; z-index: 9998;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center; padding: 24px;
+    }
+    .share-modal.open { display: flex; }
+    .share-modal-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px; max-width: 440px; width: 100%;
+    }
+    .share-modal-title {
+      font-family: 'Instrument Serif', serif; font-size: 1.2rem;
+      font-weight: 400; margin-bottom: 8px; color: var(--ink);
+    }
+    .share-modal-sub { font-size: 0.84rem; color: var(--ink-muted); margin-bottom: 20px; line-height: 1.5; }
+    .share-url-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .share-url-input {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: var(--ink-muted);
+      outline: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .btn-copy {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: 9px 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500;
+      cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+    }
+    .btn-copy:hover { opacity: 0.88; }
+    .btn-close-modal {
+      width: 100%; background: none; border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; color: var(--ink-muted);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-close-modal:hover { border-color: var(--accent); color: var(--accent); }
+
+
+    /* ── ONBOARDING ── */
+    #onboarding {
+      position: fixed; inset: 0; z-index: 997;
+      background: var(--bg);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .onboard-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px 32px;
+      max-width: 480px; width: 100%; text-align: center;
+    }
+    .onboard-step {
+      font-size: 0.76rem; color: var(--ink-muted);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px;
+    }
+    .onboard-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.8rem; font-weight: 400; margin-bottom: 8px; color: var(--ink);
+    }
+    .onboard-title em { font-style: italic; color: var(--accent); }
+    .onboard-sub { font-size: 0.9rem; color: var(--ink-muted); margin-bottom: 28px; line-height: 1.6; }
+    .onboard-options {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 24px;
+    }
+    .onboard-option {
+      background: var(--bg); border: 2px solid var(--border);
+      border-radius: 10px; padding: 14px 12px; cursor: pointer;
+      transition: all 0.15s; text-align: center;
+    }
+    .onboard-option:hover { border-color: var(--accent); }
+    .onboard-option.selected { border-color: var(--accent); background: var(--accent-lt); }
+    .onboard-option .opt-icon { font-size: 1.4rem; display: block; margin-bottom: 6px; }
+    .onboard-option .opt-label { font-size: 0.84rem; font-weight: 500; color: var(--ink); }
+    .onboard-option .opt-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 2px; }
+    .btn-onboard-next {
+      width: 100%; background: var(--accent); color: #fff; border: none;
+      border-radius: 10px; padding: 13px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
+      cursor: pointer; transition: opacity 0.15s; margin-bottom: 10px;
+    }
+    .btn-onboard-next:hover { opacity: 0.88; }
+    .btn-onboard-skip {
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: var(--ink-muted); text-decoration: underline; padding: 0;
+    }
+    .onboard-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 24px; }
+    .onboard-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border); transition: background 0.2s;
+    }
+    .onboard-dot.active { background: var(--accent); }
+    .onboard-goal-preview {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; margin-bottom: 20px; text-align: left;
+    }
+    .onboard-goal-preview .goal-name { font-weight: 500; font-size: 0.92rem; color: var(--ink); margin-bottom: 8px; }
+    .onboard-goal-preview .goal-task {
+      font-size: 0.8rem; color: var(--ink-muted); padding: 4px 0;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .onboard-goal-preview .goal-task::before {
+      content: ''; width: 12px; height: 12px; border-radius: 3px;
+      border: 1.5px solid var(--border); flex-shrink: 0; display: block;
+    }
+
+    /* ── TOAST NOTIFICATIONS ── */
+    #toast-container {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 9998; display: flex; flex-direction: column; gap: 8px;
+      align-items: center; pointer-events: none;
+    }
+    .toast {
+      background: var(--ink); color: var(--bg);
+      border-radius: 99px; padding: 10px 20px;
+      font-size: 0.88rem; font-weight: 500;
+      animation: toastIn 0.3s ease forwards;
+      pointer-events: none; white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .toast.success { background: #4A7A44; color: #fff; }
+    .toast.milestone { background: var(--accent); color: #fff; font-size: 0.95rem; padding: 12px 24px; }
+    @keyframes toastIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes toastOut { from { opacity:1; } to { opacity:0; transform:translateY(10px); } }
+
+    /* ── GOAL PROGRESS HISTORY ── */
+    .history-section {
+      border-top: 1px solid var(--border); padding: 12px 18px;
+    }
+    .history-toggle {
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: var(--ink-muted); padding: 0; display: flex;
+      align-items: center; gap: 6px; transition: color 0.15s; width: 100%;
+    }
+    .history-toggle:hover { color: var(--accent); }
+    .history-wrap { margin-top: 12px; display: none; }
+    .history-wrap.open { display: block; }
+    .sparkline-wrap { display: flex; align-items: flex-end; gap: 3px; height: 40px; margin-bottom: 6px; }
+    .sparkline-bar {
+      flex: 1; border-radius: 3px 3px 0 0; background: var(--accent);
+      opacity: 0.7; min-height: 2px; transition: height 0.3s ease;
+    }
+    .sparkline-bar.current { opacity: 1; }
+    .sparkline-bar.zero { background: var(--border); opacity: 1; }
+    .history-label { font-size: 0.72rem; color: var(--ink-muted); margin-bottom: 8px; }
+    .history-entries {
+      display: flex; flex-direction: column; gap: 4px; max-height: 120px;
+      overflow-y: auto; margin-top: 8px;
+    }
+    .history-entry { display: flex; justify-content: space-between; font-size: 0.76rem; }
+    .history-entry-date { color: var(--ink-muted); }
+    .history-entry-pct { font-weight: 500; color: var(--ink); }
+
+    /* ── MEDAL BADGE ── */
+    .medal-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.7rem; font-weight: 500; padding: 2px 8px;
+      border-radius: 99px; margin-left: 8px;
+      vertical-align: middle;
+      background: linear-gradient(135deg, #FEF3E2, #FAC775);
+      color: #633806; border: 1px solid #EF9F27;
+      animation: badgePop 0.4s cubic-bezier(.36,.07,.19,.97);
+    }
+
   </style>
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
+
+<div id="onboarding">
+  <div class="onboard-card">
+    <div class="onboard-dots">
+      <div class="onboard-dot active" id="dot-0"></div>
+      <div class="onboard-dot" id="dot-1"></div>
+      <div class="onboard-dot" id="dot-2"></div>
+    </div>
+    <div id="onboard-content"></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
 
 <div id="landing">
   <div class="landing-theme-row">
@@ -1152,6 +1527,9 @@
       <span id="auth-switch-text">Don't have an account?</span>
       <button onclick="toggleAuthMode()">Sign up</button>
     </div>
+    <div style="text-align:center;margin-top:12px" id="forgot-wrap">
+      <button onclick="showForgotPassword()" style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:0.8rem;font-family:'DM Sans',sans-serif;text-decoration:underline">Forgot password?</button>
+    </div>
   </div>
 </div>
 
@@ -1165,6 +1543,7 @@
       <div class="user-bar" id="user-bar" style="display:none">
         <span class="user-email" id="user-email"></span>
         <div class="sync-indicator"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Synced</span></div>
+        <button class="btn-signout" onclick="toggleAccountPanel()">⚙ Account</button>
         <button class="btn-signout" onclick="signOut()">Sign out</button>
       </div>
       <div class="theme-toggle">
@@ -1183,6 +1562,19 @@
   <input type="text" id="sb-url" placeholder="https://xxxx.supabase.co"/>
   <input type="text" id="sb-key" placeholder="anon key (eyJ…)"/>
   <button class="btn-connect" onclick="connectSupabase()">Connect</button>
+</div>
+
+<div class="notif-section" id="notif-section">
+  <div class="notif-header"><div class="notif-title">🔔 Daily reminders</div><button class="btn-icon" onclick="closeNotifSection()" style="font-size:0.9rem">✕</button></div>
+  <div class="notif-row">
+    <p>Get a daily nudge to check your goals and keep your streak going.</p>
+    <button class="btn-notif" id="notif-btn" onclick="requestNotifications()">Enable reminders</button>
+  </div>
+  <div class="notif-time-row" id="notif-time-row" style="display:none">
+    <label>Remind me at</label>
+    <input type="time" class="notif-time-input" id="notif-time" value="08:00" onchange="saveNotifTime(this.value)"/>
+    <span style="font-size:0.8rem;color:var(--ink-muted)">every day</span>
+  </div>
 </div>
 
 <div class="stats-bar">
@@ -1317,6 +1709,22 @@
       </div>
     </div>
 
+    <div class="monday-banner" id="monday-banner">
+      <div class="monday-banner-top">
+        <div>
+          <div class="monday-banner-title">🗓 Monday check-in</div>
+          <div class="monday-banner-sub">Start the week strong — review your goals and set your focus</div>
+        </div>
+        <button class="btn-monday" onclick="triggerMondayCheckin()">Start check-in →</button>
+      </div>
+      <button class="btn-dismiss-monday" onclick="dismissMondayCheckin()">Remind me next Monday</button>
+    </div>
+
+    <div class="cat-suggestions" id="cat-suggestions">
+      <div class="cat-suggestions-title">Suggested for your goals</div>
+      <div class="cat-chips" id="cat-chips"></div>
+    </div>
+
     <div id="proactive-notices" class="proactive-notices"></div>
 
     <button class="weekly-review-btn" onclick="triggerWeeklyReview()">
@@ -1439,6 +1847,7 @@
   function updateStreak() {
     const s = calcStreak();
     document.getElementById('streak-badge').innerHTML = `🔥 <span id="streak-count">${s}</span> day streak`;
+    checkStreakMilestones(s);
   }
 
   // ── CHART ──
@@ -1560,12 +1969,15 @@
     const wasComplete = pct(g) === 100;
     save(); renderGoal(g); updateStats(); updateStreak(); renderChart();
     syncTaskToSupabase(goalId, t);
+    // Log progress history
+    logGoalProgress(goalId);
     // Check if goal just became complete
     if (!wasComplete && pct(g) === 100 && g.tasks.length) {
       setTimeout(() => {
         const card = document.getElementById('card-' + goalId);
         if (card) card.classList.add('just-completed');
         launchConfetti();
+        awardMedal(goalId);
       }, 200);
     }
   }
@@ -1650,7 +2062,7 @@
             onblur="saveGoalTitle('${g.id}',this.value)"
             onkeydown="if(event.key==='Enter'){this.blur()}"
             title="Click to edit"/>
-          ${complete ? '<span class="goal-badge">✓ Complete</span>' : ''}
+          ${complete ? `<span class="goal-badge">✓ Complete</span>${g.completedAt ? '<span class="medal-badge">🏅 ' + g.completedAt + '</span>' : ''}` : ''}
           <div class="progress-wrap">
             <div class="progress-bar"><div class="progress-fill${complete?' complete':''}" style="width:${p}%"></div></div>
             <span class="progress-pct">${p}%</span>
@@ -1718,7 +2130,21 @@
           <textarea class="notes-area" placeholder="Jot down ideas, context, or progress thoughts…"
             oninput="saveNote('${g.id}', this.value)">${escHtml(g.notes||'')}</textarea>
         </div>
-      </div>`;
+      </div>
+      <div class="photos-section">
+        <button class="photos-toggle" onclick="togglePhotos('${g.id}')">
+          📷 Photos${(g.photos||[]).length ? ' (' + (g.photos||[]).length + ')' : ''}
+        </button>
+        <div id="photos-wrap-${g.id}" class="notes-hidden">
+          <div class="photos-grid" id="photos-grid-${g.id}">
+            ${(g.photos||[]).map(p => `<img class="photo-thumb" src="${escHtml(p.url)}" alt="Progress photo" onclick="viewPhoto('${escHtml(p.url)}')" title="${escHtml(p.date||'')}" />`).join('')}
+            <div class="photo-add" onclick="document.getElementById('photo-input-${g.id}').click()" title="Add photo">+</div>
+          </div>
+          <input type="file" class="photo-input" id="photo-input-${g.id}" accept="image/*"
+            onchange="uploadPhoto('${g.id}', this)"/>
+          <div class="photo-uploading" id="photo-status-${g.id}"></div>
+        </div>
+      </div>\`;
     // Drag events
     card.addEventListener('dragstart', e => { dragSrcId = g.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
     card.addEventListener('dragend',   () => { card.classList.remove('dragging'); document.querySelectorAll('.goal-card').forEach(c=>c.classList.remove('drag-over')); });
@@ -1745,7 +2171,7 @@
       list.innerHTML = `<div class="empty-state"><span class="icon">◎</span><p>${goals.filter(g=>!g.archived).length?'No goals match this filter.':'No goals yet — add your first one above.'}</p></div>`;
       updateStats(); renderArchived(); return;
     }
-    vis.forEach(g => list.appendChild(buildCard(g))); updateStats(); renderArchived(); buildProactiveNotices();
+    vis.forEach(g => list.appendChild(buildCard(g))); updateStats(); renderArchived(); buildProactiveNotices(); buildCategorySuggestions();
   }
   document.getElementById('goal-input').addEventListener('keydown', e => { if(e.key==='Enter') addGoal(); });
 
@@ -2338,6 +2764,616 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
     draw();
   }
 
+
+  // ── ACCOUNT MANAGEMENT ──
+  function toggleAccountPanel() {
+    const panel = document.getElementById('account-panel');
+    const isOpen = panel.style.display === 'block';
+    panel.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen && currentUser) {
+      document.getElementById('account-email-display').textContent = currentUser.email;
+    }
+    if (!isOpen) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async function sendPasswordReset() {
+    if (!sb || !currentUser) return;
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const { error } = await sb.auth.resetPasswordForEmail(currentUser.email, {
+        redirectTo: 'https://dylanmanabat-ai.github.io/ascend/'
+      });
+      if (error) throw error;
+      btn.textContent = '✓ Email sent';
+      setTimeout(() => { btn.disabled = false; btn.textContent = 'Send reset email'; }, 4000);
+    } catch(e) {
+      btn.textContent = 'Failed — try again';
+      btn.disabled = false;
+    }
+  }
+
+  async function deleteAccount() {
+    if (!sb || !currentUser) return;
+    const confirmed = confirm(
+      'Are you absolutely sure?\n\nThis will permanently delete your account and ALL your goals, tasks and progress. This cannot be undone.'
+    );
+    if (!confirmed) return;
+    const double = confirm('Last chance — delete everything permanently?');
+    if (!double) return;
+    try {
+      // Delete all user data first
+      await sb.from('goals').delete().eq('user_id', currentUser.id);
+      await sb.from('activity_log').delete().eq('user_id', currentUser.id);
+      // Sign out
+      await sb.auth.signOut();
+      // Clear local storage
+      localStorage.clear();
+      currentUser = null;
+      goals = []; activityLog = []; pinnedTasks = [];
+      alert('Your account and all data has been deleted.');
+      location.reload();
+    } catch(e) {
+      alert('Something went wrong. Please try again or contact support.');
+    }
+  }
+
+  function showForgotPassword() {
+    const email = document.getElementById('auth-email').value.trim();
+    if (!email) {
+      showAuthError('Please enter your email address above first.');
+      return;
+    }
+    if (!sb) return;
+    sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://dylanmanabat-ai.github.io/ascend/'
+    }).then(({ error }) => {
+      if (error) showAuthError(error.message);
+      else showAuthSuccess('Password reset email sent — check your inbox.');
+    });
+  }
+
+  function showForgotPasswordScreen() {
+    authMode = 'forgot';
+    document.getElementById('auth-btn').textContent = 'Send reset email';
+    document.getElementById('auth-subtitle').textContent = 'Enter your email and we'll send you a reset link.';
+    document.getElementById('auth-switch-text').textContent = 'Remember your password?';
+    document.querySelector('#auth-screen .auth-switch button').textContent = 'Sign in';
+    document.getElementById('forgot-wrap').style.display = 'none';
+    document.getElementById('auth-error').style.display = 'none';
+    document.getElementById('auth-success').style.display = 'none';
+  }
+
+
+  // ── NOTIFICATIONS ──
+  function initNotifications() {
+    const perm = Notification.permission;
+    const enabled = localStorage.getItem('notif-enabled');
+    const time = localStorage.getItem('notif-time') || '08:00';
+    document.getElementById('notif-time').value = time;
+
+    if (perm === 'granted' && enabled === '1') {
+      document.getElementById('notif-btn').textContent = '✓ Reminders on';
+      document.getElementById('notif-btn').classList.add('granted');
+      document.getElementById('notif-time-row').style.display = 'flex';
+      scheduleNotification(time);
+    } else if (perm !== 'denied') {
+      document.getElementById('notif-section').classList.add('visible');
+    }
+  }
+  async function requestNotifications() {
+    if (!('Notification' in window)) {
+      alert('Your browser does not support notifications.');
+      return;
+    }
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      localStorage.setItem('notif-enabled', '1');
+      const time = localStorage.getItem('notif-time') || '08:00';
+      document.getElementById('notif-btn').textContent = '✓ Reminders on';
+      document.getElementById('notif-btn').classList.add('granted');
+      document.getElementById('notif-time-row').style.display = 'flex';
+      document.getElementById('notif-section').classList.remove('visible');
+      scheduleNotification(time);
+    } else {
+      alert('Notifications blocked. Enable them in your browser settings.');
+    }
+  }
+  function saveNotifTime(val) {
+    localStorage.setItem('notif-time', val);
+    scheduleNotification(val);
+  }
+  function closeNotifSection() {
+    localStorage.setItem('notif-dismissed', '1');
+    document.getElementById('notif-section').classList.remove('visible');
+  }
+  function scheduleNotification(timeStr) {
+    // Clear existing
+    const existing = localStorage.getItem('notif-timeout');
+    if (existing) clearTimeout(parseInt(existing));
+
+    const [h, m] = timeStr.split(':').map(Number);
+    const now = new Date();
+    const target = new Date();
+    target.setHours(h, m, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+    const delay = target - now;
+
+    const tid = setTimeout(() => {
+      const active = goals.filter(g => !g.archived);
+      const streak = calcStreak();
+      const body = streak > 0
+        ? `🔥 ${streak} day streak! You have ${active.length} active goal${active.length !== 1 ? 's' : ''} to work on today.`
+        : `You have ${active.length} goal${active.length !== 1 ? 's' : ''} waiting. Open Ascend and make progress today!`;
+      new Notification('Ascend — Daily Check-in', { body, icon: '/ascend/icon-192.png' });
+      scheduleNotification(timeStr); // reschedule for tomorrow
+    }, delay);
+    localStorage.setItem('notif-timeout', tid.toString());
+  }
+
+  // ── PROGRESS PHOTOS ──
+  function togglePhotos(goalId) {
+    const wrap = document.getElementById('photos-wrap-' + goalId);
+    if (wrap) wrap.classList.toggle('notes-hidden');
+  }
+  async function uploadPhoto(goalId, inputEl) {
+    const file = inputEl.files[0]; if (!file) return;
+    const statusEl = document.getElementById('photo-status-' + goalId);
+    if (statusEl) statusEl.textContent = 'Uploading…';
+
+    if (!sb || !currentUser) {
+      // Fallback: use local FileReader if no Supabase storage
+      const reader = new FileReader();
+      reader.onload = e => savePhotoLocally(goalId, e.target.result);
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${currentUser.id}/${goalId}/${uid()}.${ext}`;
+      const { data, error } = await sb.storage.from('goal-photos').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = sb.storage.from('goal-photos').getPublicUrl(path);
+      savePhotoLocally(goalId, urlData.publicUrl);
+      if (statusEl) statusEl.textContent = '✓ Photo added';
+      setTimeout(() => { if(statusEl) statusEl.textContent = ''; }, 2000);
+    } catch(e) {
+      // Fallback to base64 local storage
+      const reader = new FileReader();
+      reader.onload = ev => savePhotoLocally(goalId, ev.target.result);
+      reader.readAsDataURL(file);
+      if (statusEl) statusEl.textContent = '✓ Photo saved locally';
+      setTimeout(() => { if(statusEl) statusEl.textContent = ''; }, 2000);
+    }
+    inputEl.value = '';
+  }
+  function savePhotoLocally(goalId, url) {
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    if (!g.photos) g.photos = [];
+    g.photos.push({ url, date: todayStr() });
+    save(); renderGoal(g);
+    setTimeout(() => {
+      const wrap = document.getElementById('photos-wrap-' + goalId);
+      if (wrap) wrap.classList.remove('notes-hidden');
+    }, 50);
+    syncGoalToSupabase(g);
+  }
+  function viewPhoto(url) {
+    window.open(url, '_blank');
+  }
+
+  // ── GOAL SHARING ──
+  function openShareModal(goalId) {
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    // Encode goal data as base64 URL param for read-only view
+    const shareData = {
+      title: g.title,
+      cat: g.cat,
+      priority: g.priority,
+      due: g.due,
+      progress: pct(g),
+      tasks: g.tasks.map(t => ({ label: t.label, done: t.done })),
+      sharedBy: currentUser ? currentUser.email.split('@')[0] : 'someone'
+    };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
+    const url = `https://dylanmanabat-ai.github.io/ascend/?share=${encoded}`;
+    document.getElementById('share-url-input').value = url;
+    document.getElementById('share-modal').classList.add('open');
+  }
+  function closeShareModal() {
+    document.getElementById('share-modal').classList.remove('open');
+  }
+  function copyShareUrl() {
+    const input = document.getElementById('share-url-input');
+    navigator.clipboard.writeText(input.value).then(() => {
+      const btn = document.querySelector('.btn-copy');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    }).catch(() => {
+      input.select(); document.execCommand('copy');
+    });
+  }
+  function checkShareParam() {
+    const params = new URLSearchParams(window.location.search);
+    const share = params.get('share');
+    if (!share) return;
+    try {
+      const data = JSON.parse(decodeURIComponent(escape(atob(share))));
+      showSharedGoal(data);
+    } catch(e) { console.warn('Invalid share link'); }
+  }
+  function showSharedGoal(data) {
+    const done = data.tasks.filter(t => t.done).length;
+    const total = data.tasks.length;
+    document.body.innerHTML = `
+      <div style="min-height:100vh;background:var(--bg);padding:48px 24px;font-family:'DM Sans',sans-serif;color:var(--ink)">
+        <div style="max-width:560px;margin:0 auto">
+          <div style="font-family:'Instrument Serif',serif;font-size:2.5rem;font-weight:400;letter-spacing:-0.02em;color:var(--accent);margin-bottom:32px"><em>Ascend</em></div>
+          <div style="font-size:0.8rem;color:var(--ink-muted);margin-bottom:8px">${data.sharedBy} is working on</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:2rem;font-weight:400;margin-bottom:16px">${data.title}</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+            <div style="flex:1;height:8px;background:#E2DDD6;border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:${data.progress}%;background:#C8602A;border-radius:99px"></div>
+            </div>
+            <span style="font-size:0.88rem;font-weight:500;color:#7A7570">${data.progress}%</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:32px">
+            ${data.tasks.map(t => `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:${t.done?'#EAF0E8':'#FDFAF5'};border:1px solid ${t.done?'#C8DFC6':'#E2DDD6'}">
+                <div style="width:18px;height:18px;border-radius:5px;background:${t.done?'#4A7A44':'#FDFAF5'};border:1.5px solid ${t.done?'#4A7A44':'#E2DDD6'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
+                  ${t.done ? '<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 3.5L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                </div>
+                <span style="font-size:0.9rem;color:${t.done?'#4A7A44':'#1C1A17'};${t.done?'text-decoration:line-through;text-decoration-color:#98C494':''}">${t.label}</span>
+              </div>`).join('')}
+          </div>
+          <div style="font-size:0.84rem;color:#7A7570;margin-bottom:20px">${done} of ${total} tasks complete</div>
+          <a href="https://dylanmanabat-ai.github.io/ascend/" style="display:inline-block;background:#C8602A;color:#fff;text-decoration:none;border-radius:10px;padding:12px 24px;font-size:0.9rem;font-weight:500">Try Ascend yourself →</a>
+        </div>
+      </div>`;
+  }
+
+
+  // ── MONDAY CHECK-IN ──
+  function initMondayCheckin() {
+    const today = new Date();
+    const isMonday = today.getDay() === 1;
+    if (!isMonday) return;
+
+    const lastCheckin = localStorage.getItem('last-monday-checkin');
+    const thisMonday = todayStr();
+    if (lastCheckin === thisMonday) return;
+
+    // Only show if user has goals and a key saved
+    const active = goals.filter(g => !g.archived);
+    if (!active.length) return;
+
+    document.getElementById('monday-banner').classList.add('visible');
+  }
+  function triggerMondayCheckin() {
+    const active = goals.filter(g => !g.archived);
+    const streak = calcStreak();
+    const doneTasks = active.reduce((a,g) => a + g.tasks.filter(t=>t.done).length, 0);
+    const totalTasks = active.reduce((a,g) => a + g.tasks.length, 0);
+    const highPri = active.filter(g => g.priority === 'high' && pct(g) < 100);
+    const noProgress = active.filter(g => pct(g) === 0 && g.tasks.length);
+
+    const prompt = `It's Monday — time for my weekly check-in!
+
+My stats:
+- ${active.length} active goals
+- ${doneTasks}/${totalTasks} tasks done overall
+- ${streak} day streak
+- High priority incomplete: ${highPri.map(g => g.title).join(', ') || 'none'}
+- Goals not yet started: ${noProgress.map(g => g.title).join(', ') || 'none'}
+- All goals: ${active.map(g => `${g.title} (${pct(g)}%, ${g.priority})`).join('; ')}
+
+Please give me a motivating Monday check-in:
+1. Acknowledge where I'm at and celebrate any wins
+2. Help me pick my top 3 priorities for this week
+3. Give me one thing I can do TODAY to get momentum going
+4. Keep it energetic and practical — it's the start of a new week!`;
+
+    dismissMondayCheckin();
+    document.getElementById('chat-input').value = prompt;
+    sendMessage();
+    document.getElementById('chat-messages').scrollIntoView({ behavior: 'smooth' });
+  }
+  function dismissMondayCheckin() {
+    localStorage.setItem('last-monday-checkin', todayStr());
+    document.getElementById('monday-banner').classList.remove('visible');
+  }
+
+  // ── CATEGORY-BASED SUGGESTIONS ──
+  const CAT_SUGGESTIONS = {
+    health: [
+      'How do I stay consistent with my fitness goal?',
+      'What should I eat to support my health goals?',
+      'Help me build a morning exercise routine',
+      'I keep skipping workouts — what do I do?'
+    ],
+    career: [
+      'How do I make progress on my career goals this week?',
+      'Help me prepare for a job interview',
+      'How do I build my professional network?',
+      'What skills should I prioritise learning?'
+    ],
+    learning: [
+      'What's the best way to retain what I'm learning?',
+      'Help me create a study schedule',
+      'I'm struggling to find time to learn — advice?',
+      'How do I stay motivated when learning is hard?'
+    ],
+    finance: [
+      'Help me stick to my savings goal this month',
+      'How do I stop spending on things I don't need?',
+      'Create a simple budget plan for me',
+      'How do I build an emergency fund?'
+    ],
+    personal: [
+      'How do I build better daily habits?',
+      'I'm struggling with self-discipline — help',
+      'How do I improve my relationships?',
+      'What habits do highly productive people have?'
+    ]
+  };
+
+  function buildCategorySuggestions() {
+    const active = goals.filter(g => !g.archived);
+    if (!active.length) return;
+
+    // Find the most common category
+    const catCounts = {};
+    active.forEach(g => { catCounts[g.cat] = (catCounts[g.cat] || 0) + 1; });
+    const topCat = Object.entries(catCounts).sort((a,b) => b[1]-a[1])[0]?.[0];
+    const suggestions = CAT_SUGGESTIONS[topCat];
+    if (!suggestions) return;
+
+    const container = document.getElementById('cat-suggestions');
+    const chips = document.getElementById('cat-chips');
+    if (!container || !chips) return;
+
+    chips.innerHTML = suggestions.map(s => `
+      <button class="chip" onclick="useChip(this)">${s}</button>
+    `).join('');
+    container.classList.add('visible');
+  }
+
+
+  // ── TOAST ──
+  function showToast(msg, type='', duration=3500) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (type ? ' ' + type : '');
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.animation = 'toastOut 0.3s ease forwards';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  // ── STREAK MILESTONES ──
+  const STREAK_MILESTONES = [7, 14, 30, 60, 100, 365];
+  function checkStreakMilestones(streak) {
+    const achieved = localStorage.getItem('streak-milestones') || '[]';
+    const done = JSON.parse(achieved);
+    if (STREAK_MILESTONES.includes(streak) && !done.includes(streak)) {
+      done.push(streak);
+      localStorage.setItem('streak-milestones', JSON.stringify(done));
+      launchConfetti();
+      const msgs = {
+        7: '🔥 7 day streak! One week of consistency — you're building something real.',
+        14: '🔥 14 days! Two weeks strong. Habits are forming.',
+        30: '🏆 30 day streak! One month of daily progress. Incredible.',
+        60: '🏆 60 days! Two months of consistency. You're unstoppable.',
+        100: '🎖 100 day streak! Triple digits. This is who you are now.',
+        365: '🌟 365 days! One full year of Ascend. Legendary.'
+      };
+      setTimeout(() => showToast(msgs[streak] || `🔥 ${streak} day streak milestone!`, 'milestone', 5000), 400);
+    }
+  }
+
+  // ── GOAL COMPLETION MEDAL ──
+  function awardMedal(goalId) {
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    if (g.completedAt) return; // already awarded
+    g.completedAt = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    save(); renderGoal(g); syncGoalToSupabase(g);
+    setTimeout(() => showToast(`🏅 Medal earned for completing "${g.title}"!`, 'milestone', 4000), 600);
+  }
+
+  // ── GOAL PROGRESS HISTORY ──
+  function toggleHistory(goalId) {
+    const wrap = document.getElementById('history-wrap-' + goalId);
+    if (!wrap) return;
+    const isOpen = wrap.classList.toggle('open');
+    if (isOpen) renderHistory(goalId);
+  }
+  function logGoalProgress(goalId) {
+    const g = goals.find(g => g.id === goalId); if (!g) return;
+    const key = 'goal-history-' + goalId;
+    const history = JSON.parse(localStorage.getItem(key) || '[]');
+    const today = todayStr();
+    const p = pct(g);
+    const last = history[history.length - 1];
+    if (last && last.date === today) {
+      last.pct = p; // update today's entry
+    } else {
+      history.push({ date: today, pct: p });
+    }
+    // Keep last 30 entries
+    const trimmed = history.slice(-30);
+    localStorage.setItem(key, JSON.stringify(trimmed));
+  }
+  function renderHistory(goalId) {
+    const key = 'goal-history-' + goalId;
+    const history = JSON.parse(localStorage.getItem(key) || '[]');
+    const sparkline = document.getElementById('sparkline-' + goalId);
+    const label = document.getElementById('history-label-' + goalId);
+    const entries = document.getElementById('history-entries-' + goalId);
+    if (!sparkline) return;
+
+    if (!history.length) {
+      label.textContent = 'No history yet — progress will be tracked from today.';
+      sparkline.innerHTML = '';
+      entries.innerHTML = '';
+      return;
+    }
+
+    // Sparkline bars
+    const max = Math.max(...history.map(h => h.pct), 1);
+    sparkline.innerHTML = history.map((h, i) => {
+      const h_pct = h.pct === 0 ? 2 : Math.max((h.pct / max) * 100, 4);
+      const isCurrent = i === history.length - 1;
+      return `<div class="sparkline-bar${h.pct === 0 ? ' zero' : ''}${isCurrent ? ' current' : ''}"
+        style="height:${h_pct}%" title="${h.date}: ${h.pct}%"></div>`;
+    }).join('');
+
+    label.textContent = `Progress over ${history.length} day${history.length !== 1 ? 's' : ''} — from ${history[0].pct}% to ${history[history.length-1].pct}%`;
+
+    // Entry list (most recent first)
+    entries.innerHTML = [...history].reverse().map(h => `
+      <div class="history-entry">
+        <span class="history-entry-date">${h.date}</span>
+        <span class="history-entry-pct">${h.pct}%</span>
+      </div>`).join('');
+  }
+
+  // ── ONBOARDING ──
+  const ONBOARD_GOALS = {
+    health: { title: 'Get fit and healthy', cat: 'health', priority: 'high',
+      tasks: ['Set a weekly workout schedule', 'Track meals for 7 days', 'Complete 3 workouts this week', 'Rest and recovery day'] },
+    career: { title: 'Advance my career', cat: 'career', priority: 'high',
+      tasks: ['Update CV and LinkedIn profile', 'Apply to 3 positions this week', 'Learn one new skill this month', 'Build a portfolio project'] },
+    learning: { title: 'Learn something new', cat: 'learning', priority: 'medium',
+      tasks: ['Choose a course or resource', 'Study for 30 minutes daily', 'Complete first module', 'Share what I have learned'] },
+    finance: { title: 'Improve my finances', cat: 'finance', priority: 'high',
+      tasks: ['Review monthly expenses', 'Set a monthly savings target', 'Cancel unused subscriptions', 'Automate savings'] },
+    personal: { title: 'Grow as a person', cat: 'personal', priority: 'medium',
+      tasks: ['Build one new daily habit', 'Journal for 5 minutes each day', 'Read for 20 minutes daily', 'Reach out to someone I care about'] }
+  };
+  let onboardStep = 0;
+  let onboardCat = null;
+
+  function startOnboarding() {
+    document.getElementById('onboarding').style.display = 'flex';
+    renderOnboardStep(0);
+  }
+  function closeOnboarding() {
+    document.getElementById('onboarding').style.display = 'none';
+    localStorage.setItem('onboarding-done', '1');
+  }
+  function setOnboardDot(step) {
+    [0,1,2].forEach(i => {
+      document.getElementById('dot-' + i).classList.toggle('active', i === step);
+    });
+  }
+  function renderOnboardStep(step) {
+    onboardStep = step;
+    setOnboardDot(step);
+    const content = document.getElementById('onboard-content');
+    if (step === 0) {
+      content.innerHTML = `
+        <div class="onboard-step">Step 1 of 3</div>
+        <div class="onboard-title">Welcome to <em>Ascend</em></div>
+        <div class="onboard-sub">What area of your life do you most want to improve right now?</div>
+        <div class="onboard-options">
+          <div class="onboard-option" onclick="selectOnboardCat('health',this)">
+            <span class="opt-icon">💪</span>
+            <div class="opt-label">Health & Fitness</div>
+            <div class="opt-sub">Exercise, diet, wellbeing</div>
+          </div>
+          <div class="onboard-option" onclick="selectOnboardCat('career',this)">
+            <span class="opt-icon">💼</span>
+            <div class="opt-label">Career</div>
+            <div class="opt-sub">Jobs, skills, growth</div>
+          </div>
+          <div class="onboard-option" onclick="selectOnboardCat('learning',this)">
+            <span class="opt-icon">📚</span>
+            <div class="opt-label">Learning</div>
+            <div class="opt-sub">Skills, courses, reading</div>
+          </div>
+          <div class="onboard-option" onclick="selectOnboardCat('finance',this)">
+            <span class="opt-icon">💰</span>
+            <div class="opt-label">Finance</div>
+            <div class="opt-sub">Savings, budgeting</div>
+          </div>
+          <div class="onboard-option" onclick="selectOnboardCat('personal',this)" style="grid-column:1/-1">
+            <span class="opt-icon">🌱</span>
+            <div class="opt-label">Personal Growth</div>
+            <div class="opt-sub">Habits, relationships, mindset</div>
+          </div>
+        </div>
+        <button class="btn-onboard-skip" onclick="closeOnboarding()">Skip setup</button>`;
+    } else if (step === 1) {
+      const template = ONBOARD_GOALS[onboardCat];
+      content.innerHTML = `
+        <div class="onboard-step">Step 2 of 3</div>
+        <div class="onboard-title">Your starter <em>goal</em></div>
+        <div class="onboard-sub">We've built a goal to get you started. You can edit everything once you're in.</div>
+        <div class="onboard-goal-preview">
+          <div class="goal-name">${template.title}</div>
+          ${template.tasks.map(t => `<div class="goal-task">${t}</div>`).join('')}
+        </div>
+        <button class="btn-onboard-next" onclick="renderOnboardStep(2)">Looks good →</button>
+        <button class="btn-onboard-skip" onclick="closeOnboarding()">Skip</button>`;
+    } else if (step === 2) {
+      content.innerHTML = `
+        <div class="onboard-step">Step 3 of 3</div>
+        <div class="onboard-title">Set a daily <em>reminder</em></div>
+        <div class="onboard-sub">A daily nudge keeps you consistent. Pick a time that works for you — you can change it later.</div>
+        <div style="margin-bottom:24px">
+          <input type="time" class="notif-time-input" id="onboard-time" value="08:00"
+            style="font-size:1.1rem;padding:10px 16px;margin-bottom:8px;width:100%;text-align:center"/>
+          <div style="font-size:0.8rem;color:var(--ink-muted)">You'll get a daily check-in at this time</div>
+        </div>
+        <button class="btn-onboard-next" onclick="finishOnboarding()">Start Ascending →</button>
+        <button class="btn-onboard-skip" onclick="finishOnboarding(true)">Skip reminders</button>`;
+    }
+  }
+  function selectOnboardCat(cat, el) {
+    document.querySelectorAll('.onboard-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    onboardCat = cat;
+    setTimeout(() => renderOnboardStep(1), 300);
+  }
+  async function finishOnboarding(skipReminder=false) {
+    // Add starter goal
+    if (onboardCat && ONBOARD_GOALS[onboardCat]) {
+      const tmpl = ONBOARD_GOALS[onboardCat];
+      const newGoal = {
+        id: uid(), title: tmpl.title, cat: tmpl.cat,
+        priority: tmpl.priority, due: '', notes: '', photos: [],
+        tasks: tmpl.tasks.map(label => ({ id: uid(), label, done: false, subtasks: [] }))
+      };
+      goals.unshift(newGoal);
+      save(); render();
+      await syncGoalToSupabase(newGoal);
+      for (const t of newGoal.tasks) await syncTaskToSupabase(newGoal.id, t);
+    }
+    // Set reminder
+    if (!skipReminder) {
+      const time = document.getElementById('onboard-time')?.value || '08:00';
+      localStorage.setItem('notif-time', time);
+      if (Notification.permission !== 'granted') {
+        await requestNotifications().catch(() => {});
+      } else {
+        scheduleNotification(time);
+      }
+    }
+    closeOnboarding();
+    showToast('Welcome to Ascend! Your first goal is ready 🎯', 'success', 4000);
+  }
+  function checkOnboarding() {
+    const done = localStorage.getItem('onboarding-done');
+    const hasGoals = goals.filter(g => !g.archived).length > 0;
+    // Show onboarding for new users with no goals
+    if (!done && !hasGoals && currentUser) {
+      setTimeout(() => startOnboarding(), 800);
+    }
+  }
+
   // ── THEME ──
   function toggleTheme() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -2421,6 +3457,7 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
     document.getElementById('auth-switch-text').textContent = authMode === 'signin'
       ? "Don't have an account?" : 'Already have an account?';
     document.querySelector('#auth-screen .auth-switch button').textContent = authMode === 'signin' ? 'Sign up' : 'Sign in';
+    document.getElementById('forgot-wrap').style.display = authMode === 'signin' ? 'block' : 'none';
     document.getElementById('auth-error').style.display = 'none';
     document.getElementById('auth-success').style.display = 'none';
   }
@@ -2440,6 +3477,7 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
     const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value;
     const btn = document.getElementById('auth-btn');
+    if (authMode === 'forgot') { showForgotPassword(); btn.disabled = false; btn.textContent = 'Send reset email'; return; }
     if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
     btn.disabled = true; btn.textContent = authMode === 'signin' ? 'Signing in…' : 'Creating account…';
     document.getElementById('auth-error').style.display = 'none';
@@ -2518,7 +3556,8 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
       goals = (goalsRes.data || []).map(g => ({
         id: g.id, title: g.title, cat: g.cat, priority: g.priority,
         due: g.due, notes: g.notes, archived: g.archived,
-        archivedAt: g.archived_at,
+        archivedAt: g.archived_at, photos: g.photos || [],
+        completedAt: g.completed_at || '',
         tasks: tasksMap[g.id] || []
       }));
 
@@ -2542,7 +3581,9 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
         title: g.title, cat: g.cat || 'other',
         priority: g.priority || 'medium', due: g.due || '',
         notes: g.notes || '', archived: g.archived || false,
-        archived_at: g.archivedAt || '', sort_order: sortOrder
+        archived_at: g.archivedAt || '', sort_order: sortOrder,
+        photos: g.photos || [],
+        completed_at: g.completedAt || ''
       });
       setSyncStatus('synced', 'Synced');
     } catch(e) { setSyncStatus('error', 'Sync error'); }
@@ -2604,8 +3645,26 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
   renderChart();
   renderArchived();
   buildProactiveNotices();
+  buildCategorySuggestions();
   resetRecurringTasks();
+  initMondayCheckin();
+  checkOnboarding();
+  initNotifications();
+  checkShareParam();
 </script>
+
+
+<div class="share-modal" id="share-modal">
+  <div class="share-modal-card">
+    <div class="share-modal-title">Share this goal</div>
+    <div class="share-modal-sub">Anyone with this link can view your goal and progress — they won't be able to edit anything.</div>
+    <div class="share-url-row">
+      <input class="share-url-input" id="share-url-input" readonly/>
+      <button class="btn-copy" onclick="copyShareUrl()">Copy</button>
+    </div>
+    <button class="btn-close-modal" onclick="closeShareModal()">Close</button>
+  </div>
+</div>
 
 </body>
   <script>
@@ -2617,5 +3676,18 @@ Keep responses concise, warm, and practical. When adding a goal, briefly explain
       });
     }
   </script>
+
+<div class="share-modal" id="share-modal">
+  <div class="share-modal-card">
+    <div class="share-modal-title">Share this goal</div>
+    <div class="share-modal-sub">Anyone with this link can view your goal and progress — they won't be able to edit anything.</div>
+    <div class="share-url-row">
+      <input class="share-url-input" id="share-url-input" readonly/>
+      <button class="btn-copy" onclick="copyShareUrl()">Copy</button>
+    </div>
+    <button class="btn-close-modal" onclick="closeShareModal()">Close</button>
+  </div>
+</div>
+
 </body>
 </html>
